@@ -20,8 +20,8 @@ typedef enum {
 } LIS2MDL_STATUS;
 
 LIS2MDL_STATUS LIS2MDL_Setup(LIS2MDL * const lis2mdl,
-														 SPI_HandleTypeDef * const hspi);
+                             SPI_HandleTypeDef * const hspi);
 LIS2MDL_STATUS LIS2MDL_Read(LIS2MDL * const lis2mdl,
-														SPI_HandleTypeDef * const hspi);
+                            SPI_HandleTypeDef * const hspi);
 
 #endif /* INC_LIS2MDL_H_ */

@@ -11,24 +11,24 @@
 
 void StartTaskBMP388(void *argument){
 
-	SENSOR_ARGS args = *(SENSOR_ARGS*)argument;
-	BMP388 bmp388;
-	BMP388_COMP bmp388_comp;
+    SENSOR_ARGS args = *(SENSOR_ARGS*)argument;
+    BMP388 bmp388;
+    BMP388_COMP bmp388_comp;
 
-	if(BMP388_Setup(&bmp388, &bmp388_comp, args.hspi) != BMP388_SUCCESS) {
-		// do nothing for now
-	}
+    if(BMP388_Setup(&bmp388, &bmp388_comp, args.hspi) != BMP388_SUCCESS) {
+        // do nothing for now
+    }
 
-	for(;;) {
-		if(BMP388_ReadTempPres(&bmp388, &bmp388_comp, args.hspi) != BMP388_SUCCESS) {
-			// do nothing for now
-		}
+    for(;;) {
+        if(BMP388_ReadTempPres(&bmp388, &bmp388_comp, args.hspi) != BMP388_SUCCESS) {
+            // do nothing for now
+        }
 
-		RingBuffer_enqueue(args.uart_rb,
-						   (RingBuffer_t){.type = UPDATE_BMP388,
-										  .bmp388 = bmp388});
-		osSemaphoreRelease(*args.uartSemaphore);
+        RingBuffer_enqueue(args.uart_rb,
+                           (RingBuffer_t){.type = UPDATE_BMP388,
+                                          .bmp388 = bmp388});
+        osSemaphoreRelease(*args.uartSemaphore);
 
-		osDelay(50);
-	}
+        osDelay(50);
+    }
 }

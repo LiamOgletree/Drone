@@ -13,10 +13,10 @@
 #include "ringbuffer.h"
 
 typedef struct {
-	SPI_HandleTypeDef * const hspi;
-	UART_HandleTypeDef * const huart;
-	RingBuffer * const uart_rb;
-	osSemaphoreId_t * const uartSemaphore;
+    SPI_HandleTypeDef * const hspi;
+    UART_HandleTypeDef * const huart;
+    RingBuffer * const uart_rb;
+    osSemaphoreId_t * const uartSemaphore;
 } SENSOR_ARGS;
 
 #endif /* INC_SENSOR_H_ */
