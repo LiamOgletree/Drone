@@ -18,16 +18,16 @@ void StartTaskLIS2MDL(void *argument) {
 		// do nothing for now
 	}
 
-  for(;;) {
-  	if(LIS2MDL_Read(&lis2mdl, args.hspi) != LIS2MDL_SUCCESS) {
-  		// do nothing for now
-  	}
+	for(;;) {
+		if(LIS2MDL_Read(&lis2mdl, args.hspi) != LIS2MDL_SUCCESS) {
+			// do nothing for now
+		}
 
-  	RingBuffer_enqueue(args.uart_rb,
-  										 (RingBuffer_t){.type = UPDATE_LIS2MDL,
-  																		.lis2mdl = lis2mdl});
-  	osSemaphoreRelease(*args.uartSemaphore);
+		RingBuffer_enqueue(args.uart_rb,
+						   (RingBuffer_t){.type = UPDATE_LIS2MDL,
+										  .lis2mdl = lis2mdl});
+		osSemaphoreRelease(*args.uartSemaphore);
 
-    osDelay(125);
-  }
+		osDelay(125);
+	}
 }

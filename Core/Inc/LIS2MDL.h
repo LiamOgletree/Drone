@@ -11,12 +11,12 @@
 #include "main.h"
 
 typedef struct LIS2MDL {
-  int16_t X, Y, Z;
+    int16_t X, Y, Z;
 } LIS2MDL;
 
 typedef enum {
-  LIS2MDL_SUCCESS,
-  LIS2MDL_FAILURE
+    LIS2MDL_SUCCESS,
+    LIS2MDL_FAILURE
 } LIS2MDL_STATUS;
 
 LIS2MDL_STATUS LIS2MDL_Setup(LIS2MDL * const lis2mdl,

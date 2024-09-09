@@ -9,13 +9,13 @@
 #include "cmsis_os.h"
 
 /******************************/
-/*		  		MACROS		   			*/
+/*		  	 MACROS		      */
 /******************************/
 
-#define WRITE         (0x00)
-#define READ          (0x80)
-#define GPIOx					(GPIOA)
-#define GPIO_PINx			(GPIO_PIN_8)
+#define WRITE         	(0x00)
+#define READ          	(0x80)
+#define GPIOx			(GPIOA)
+#define GPIO_PINx		(GPIO_PIN_8)
 #define REG_WHO_AM_I	(0x0F)
 #define REG_CTRL1_XL	(0x10)
 #define REG_CTRL2_G		(0x11)
@@ -26,15 +26,16 @@
 #define SET_XL_WEIGHT	(0x08)
 #define REG_OUTPUTS		(0x22)
 
+
 /******************************/
-/*			HELPER FUNCTIONS			*/
+/*		HELPER FUNCTIONS	  */
 /******************************/
 
 static inline void transmit_receive(uint8_t const * const TX,
-																		uint8_t const NUM_TX,
-																		uint8_t * const RX,
-																		uint8_t const NUM_RX,
-																		SPI_HandleTypeDef * const hspi) {
+									uint8_t const NUM_TX,
+									uint8_t * const RX,
+									uint8_t const NUM_RX,
+									SPI_HandleTypeDef * const hspi) {
 	taskENTER_CRITICAL();
 	HAL_GPIO_WritePin(GPIOx, GPIO_PINx, GPIO_PIN_RESET);
 	HAL_SPI_Transmit(hspi, (uint8_t *)TX, NUM_TX, HAL_MAX_DELAY);
@@ -44,8 +45,8 @@ static inline void transmit_receive(uint8_t const * const TX,
 }
 
 static inline void transmit(uint8_t const * const TX,
-														uint8_t const NUM_TX,
-														SPI_HandleTypeDef * const hspi) {
+							uint8_t const NUM_TX,
+							SPI_HandleTypeDef * const hspi) {
 	taskENTER_CRITICAL();
 	HAL_GPIO_WritePin(GPIOx, GPIO_PINx, GPIO_PIN_RESET);
 	HAL_SPI_Transmit(hspi, (uint8_t *)TX, NUM_TX, HAL_MAX_DELAY);
@@ -54,11 +55,11 @@ static inline void transmit(uint8_t const * const TX,
 }
 
 /******************************/
-/*		  CORE FUNCTIONS		  	*/
+/*		 CORE FUNCTIONS		  */
 /******************************/
 
 LSM6DSO32_STATUS LSM6DSO32_Setup(LSM6DSO32 * const lsm6dso32,
-																 SPI_HandleTypeDef * const hspi) {
+								 SPI_HandleTypeDef * const hspi) {
 	const uint8_t TX1[] = {
 		WRITE | REG_CTRL1_XL,
 		WRITE | SET_ODR_104HZ,
@@ -78,7 +79,7 @@ LSM6DSO32_STATUS LSM6DSO32_Setup(LSM6DSO32 * const lsm6dso32,
 }
 
 LSM6DSO32_STATUS LSM6DSO32_Read(LSM6DSO32 * const lsm6dso32,
-																SPI_HandleTypeDef * const hspi) {
+								SPI_HandleTypeDef * const hspi) {
 	const uint8_t TX[] = { READ  | REG_OUTPUTS };
 	uint8_t RX[12] = {0};
 

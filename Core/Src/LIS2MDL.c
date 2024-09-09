@@ -10,13 +10,13 @@
 #include "math.h"
 
 /******************************/
-/*		  		MACROS		   			*/
+/*		  	 MACROS		      */
 /******************************/
 
-#define WRITE         (0x00)
-#define READ          (0x80)
-#define GPIOx					(GPIOB)
-#define GPIO_PINx			(GPIO_PIN_4)
+#define WRITE         	(0x00)
+#define READ          	(0x80)
+#define GPIOx			(GPIOB)
+#define GPIO_PINx		(GPIO_PIN_4)
 #define SET_DEFAULT		(0x00)
 #define ENABLE_SENSOR	(0x80)
 #define SET_SPI_4WIRE	(0x04)
@@ -25,14 +25,14 @@
 #define REG_OUTPUTS		(0x68)
 
 /******************************/
-/*			HELPER FUNCTIONS			*/
+/*		HELPER FUNCTIONS	  */
 /******************************/
 
 static inline void transmit_receive(uint8_t const * const TX,
-																		uint8_t const NUM_TX,
-																		uint8_t * const RX,
-																		uint8_t const NUM_RX,
-																		SPI_HandleTypeDef * const hspi) {
+									uint8_t const NUM_TX,
+									uint8_t * const RX,
+									uint8_t const NUM_RX,
+									SPI_HandleTypeDef * const hspi) {
 	taskENTER_CRITICAL();
 	HAL_GPIO_WritePin(GPIOx, GPIO_PINx, GPIO_PIN_RESET);
 	HAL_SPI_Transmit(hspi, (uint8_t *)TX, NUM_TX, HAL_MAX_DELAY);
@@ -42,8 +42,8 @@ static inline void transmit_receive(uint8_t const * const TX,
 }
 
 static inline void transmit(uint8_t const * const TX,
-														uint8_t const NUM_TX,
-														SPI_HandleTypeDef * const hspi) {
+							uint8_t const NUM_TX,
+							SPI_HandleTypeDef * const hspi) {
 	taskENTER_CRITICAL();
 	HAL_GPIO_WritePin(GPIOx, GPIO_PINx, GPIO_PIN_RESET);
 	HAL_SPI_Transmit(hspi, (uint8_t *)TX, NUM_TX, HAL_MAX_DELAY);
@@ -52,42 +52,42 @@ static inline void transmit(uint8_t const * const TX,
 }
 
 /******************************/
-/*		  CORE FUNCTIONS		  	*/
+/*		 CORE FUNCTIONS		  */
 /******************************/
 
 LIS2MDL_STATUS LIS2MDL_Setup(LIS2MDL * const lis2mdl,
-														 SPI_HandleTypeDef * const hspi) {
+							 SPI_HandleTypeDef * const hspi) {
 	// Configure sensor
-  const uint8_t TX1[] = {
+	const uint8_t TX1[] = {
 		WRITE | REG_CONFIGS,
 		WRITE | ENABLE_SENSOR,
 		WRITE | SET_DEFAULT,
 		WRITE | SET_SPI_4WIRE
-  };
+	};
 
-  transmit(TX1, 4, hspi);
+	transmit(TX1, 4, hspi);
 
-  // If expected WHO_AM_I value is not received, return failure
-  const uint8_t TX2[] = { READ | REG_WHO_AM_I };
+	// If expected WHO_AM_I value is not received, return failure
+	const uint8_t TX2[] = { READ | REG_WHO_AM_I };
 	uint8_t RX[1];
 
 	transmit_receive(TX2, 1, RX, 1, hspi);
 
 	if(RX[0] != 0x40) return LIS2MDL_FAILURE;
 
-  return LIS2MDL_SUCCESS;
+	return LIS2MDL_SUCCESS;
 }
 
 LIS2MDL_STATUS LIS2MDL_Read(LIS2MDL * const lis2mdl,
-														SPI_HandleTypeDef * const hspi){
-  const uint8_t TX[] = { READ | REG_OUTPUTS };
-  uint8_t RX[6] = {0};
+							SPI_HandleTypeDef * const hspi){
+	const uint8_t TX[] = { READ | REG_OUTPUTS };
+	uint8_t RX[6] = {0};
 
-  transmit_receive(TX, 1, RX, 6, hspi);
+	transmit_receive(TX, 1, RX, 6, hspi);
 
-  lis2mdl->X = (int16_t)(((uint16_t)RX[1] << 8) | RX[0]);
-  lis2mdl->Y = (int16_t)(((uint16_t)RX[3] << 8) | RX[2]);
-  lis2mdl->Z = (int16_t)(((uint16_t)RX[5] << 8) | RX[4]);
+	lis2mdl->X = (int16_t)(((uint16_t)RX[1] << 8) | RX[0]);
+	lis2mdl->Y = (int16_t)(((uint16_t)RX[3] << 8) | RX[2]);
+	lis2mdl->Z = (int16_t)(((uint16_t)RX[5] << 8) | RX[4]);
 
-  return LIS2MDL_SUCCESS;
+	return LIS2MDL_SUCCESS;
 }

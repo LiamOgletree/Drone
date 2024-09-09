@@ -25,8 +25,8 @@ void StartTaskBMP388(void *argument){
 		}
 
 		RingBuffer_enqueue(args.uart_rb,
-											 (RingBuffer_t){.type = UPDATE_BMP388,
-																			.bmp388 = bmp388});
+						   (RingBuffer_t){.type = UPDATE_BMP388,
+										  .bmp388 = bmp388});
 		osSemaphoreRelease(*args.uartSemaphore);
 
 		osDelay(50);

@@ -3,12 +3,12 @@
 
 /*----------------------------------------------------------------------------*/
 RB_STATUS RingBuffer_ctor(RingBuffer * const rb, uint32_t const capacity, RingBuffer_t * const buffer){
-  // If capacity is 0 or buffer is a nullptr, return failure.
-  if(!capacity || !buffer)
-  {
-    return RB_FAILURE;
-  }
-  // Else, initialize values and return success.
+	// If capacity is 0 or buffer is a nullptr, return failure.
+	if(!capacity || !buffer)
+	{
+		return RB_FAILURE;
+	}
+	// Else, initialize values and return success.
 	rb->capacity = capacity;
 	rb->buffer   = buffer;
 	rb->size     = (uint32_t)0;

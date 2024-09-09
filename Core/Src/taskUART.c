@@ -22,7 +22,7 @@ void StartTaskUART(void *argument) {
 							 "Magnetometer:\r\n"
 							 "\tX:\r\n"
 							 "\tY:\r\n"
-							 "\tZ:\r\n"
+	             "\tZ:\r\n"
 							 "Gyroscope:\r\n"
 							 "\tX:\r\n"
 							 "\tY:\r\n"

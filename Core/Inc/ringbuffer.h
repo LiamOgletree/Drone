@@ -37,11 +37,13 @@ typedef struct RingBuffer {
 } RingBuffer;
 
 typedef enum {
-  RB_SUCCESS,
-  RB_FAILURE
+	RB_SUCCESS,
+	RB_FAILURE
 } RB_STATUS;
 
-RB_STATUS RingBuffer_ctor(RingBuffer * const rb, uint32_t const capacity, RingBuffer_t * const buffer);
+RB_STATUS RingBuffer_ctor(RingBuffer * const rb, 
+						  uint32_t const capacity, 
+						  RingBuffer_t * const buffer);
 RB_STATUS RingBuffer_enqueue(RingBuffer * const rb, RingBuffer_t const item);
 RB_STATUS RingBuffer_dequeue(RingBuffer * const rb, RingBuffer_t * const item);
 

@@ -9,29 +9,29 @@
 #include "cmsis_os.h"
 
 /******************************/
-/*		  		MACROS		   			*/
+/*		  	 MACROS		      */
 /******************************/
 
 #define WRITE           (0x00)
 #define READ            (0x80)
-#define GPIOx						(GPIOB)
-#define GPIO_PINx				(GPIO_PIN_10)
-#define REG_WHO_AM_I		(0x00)
+#define GPIOx			(GPIOB)
+#define GPIO_PINx		(GPIO_PIN_10)
+#define REG_WHO_AM_I	(0x00)
 #define REG_CALIBRATION	(0x31)
 #define REG_PWR_CTRL    (0x1B)
-#define REG_OUTPUTS  		(0x04)
-#define REG_PRES				(0x04)
-#define REG_TEMP				(0x07)
+#define REG_OUTPUTS  	(0x04)
+#define REG_PRES		(0x04)
+#define REG_TEMP		(0x07)
 #define PRES_ENABLE     (0x01)
 #define TEMP_ENABLE     (0x02)
 #define NORMAL_MODE     (0x30)
 
 /******************************/
-/*			HELPER FUNCTIONS			*/
+/*		HELPER FUNCTIONS	  */
 /******************************/
 
 static inline void compute_compensations(BMP388_COMP * const bmp388_comp,
-																				 uint8_t const * const DATA) {
+										 uint8_t const * const DATA) {
 	bmp388_comp->T1 =  (float)((DATA[2] << 8) | DATA[1]) * 256.f;
 	bmp388_comp->T2 =  (float)((DATA[4] << 8) | DATA[3]) / 1073741824.f;
 	bmp388_comp->T3 =  (float)(DATA[5]) / 281474976710656.f;
@@ -49,8 +49,8 @@ static inline void compute_compensations(BMP388_COMP * const bmp388_comp,
 }
 
 static inline void compensate_temperature(BMP388 * const bmp388,
-																					BMP388_COMP * const bmp388_comp,
-																					float const uncomp_temp) {
+										  BMP388_COMP * const bmp388_comp,
+										  float const uncomp_temp) {
 	float partial_data1 = uncomp_temp - bmp388_comp->T1;
 	bmp388->temperature = \
 			(partial_data1 * bmp388_comp->T2) + \
@@ -58,14 +58,14 @@ static inline void compensate_temperature(BMP388 * const bmp388,
 }
 
 static inline void compensate_pressure(BMP388 * const bmp388,
-																			 BMP388_COMP * const bmp388_comp,
-																			 float const uncomp_pres) {
+									   BMP388_COMP * const bmp388_comp,
+									   float const uncomp_pres) {
 	const float temperature = bmp388->temperature;
 	float partial_out1 = \
-	      (bmp388_comp->P5) + \
-	      (bmp388_comp->P6 * temperature) + \
-	      (bmp388_comp->P7 * temperature * temperature) + \
-	      (bmp388_comp->P8 * temperature * temperature * temperature);
+			(bmp388_comp->P5) + \
+			(bmp388_comp->P6 * temperature) + \
+			(bmp388_comp->P7 * temperature * temperature) + \
+			(bmp388_comp->P8 * temperature * temperature * temperature);
 	float partial_out2 = uncomp_pres * \
 			(bmp388_comp->P1 + \
 			(bmp388_comp->P2 * temperature) + \
@@ -78,10 +78,10 @@ static inline void compensate_pressure(BMP388 * const bmp388,
 }
 
 static inline void transmit_receive(uint8_t const * const TX,
-																		uint8_t const NUM_TX,
-																		uint8_t * const RX,
-																		uint8_t const NUM_RX,
-																		SPI_HandleTypeDef * const hspi) {
+									uint8_t const NUM_TX,
+									uint8_t * const RX,
+									uint8_t const NUM_RX,
+									SPI_HandleTypeDef * const hspi) {
 	taskENTER_CRITICAL();
 	HAL_GPIO_WritePin(GPIOx, GPIO_PINx, GPIO_PIN_RESET);
 	HAL_SPI_Transmit(hspi, (uint8_t *)TX, NUM_TX, HAL_MAX_DELAY);
@@ -91,12 +91,12 @@ static inline void transmit_receive(uint8_t const * const TX,
 }
 
 /******************************/
-/*		  CORE FUNCTIONS		  	*/
+/*		 CORE FUNCTIONS		  */
 /******************************/
 
 BMP388_STATUS BMP388_Setup(BMP388 * const bmp388,
-		 	 	 	 	 	 	 	 	 	 	 	 BMP388_COMP * const bmp388_comp,
-													 SPI_HandleTypeDef * const hspi) {
+						   BMP388_COMP * const bmp388_comp,
+						   SPI_HandleTypeDef * const hspi) {
 	// If expected CHIP ID is not received, return failure
 	const uint8_t TX1[] = { READ | REG_WHO_AM_I };
 	uint8_t RX[22] = {0};
@@ -106,38 +106,38 @@ BMP388_STATUS BMP388_Setup(BMP388 * const bmp388,
 	if(RX[1] != 0x50) return BMP388_FAILURE;
 
 	// Otherwise, configure sensor and receive calibration values
-  const uint8_t TX2[] = {
-      WRITE | REG_PWR_CTRL,
-      WRITE | PRES_ENABLE | TEMP_ENABLE | NORMAL_MODE,
-      READ  | REG_CALIBRATION
-  };
+	const uint8_t TX2[] = {
+		WRITE | REG_PWR_CTRL,
+		WRITE | PRES_ENABLE | TEMP_ENABLE | NORMAL_MODE,
+		READ  | REG_CALIBRATION
+	};
 
-  transmit_receive(TX2, 3, RX, 22, hspi);
-  compute_compensations(bmp388_comp, RX);
+	transmit_receive(TX2, 3, RX, 22, hspi);
+	compute_compensations(bmp388_comp, RX);
 
-  return BMP388_SUCCESS;
+	return BMP388_SUCCESS;
 }
 
 BMP388_STATUS BMP388_ReadTempPres(BMP388 * const bmp388,
-	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	BMP388_COMP * const bmp388_comp,
-																	SPI_HandleTypeDef * const hspi) {
-  const uint8_t TX[] = { READ  | REG_OUTPUTS };
-  uint8_t RX[7] = {0};
+								  BMP388_COMP * const bmp388_comp,
+								  SPI_HandleTypeDef * const hspi) {
+	const uint8_t TX[] = { READ  | REG_OUTPUTS };
+	uint8_t RX[7] = {0};
 
-  transmit_receive(TX, 1, RX, 7, hspi);
+	transmit_receive(TX, 1, RX, 7, hspi);
 
-  float uncomp_temp = (float)((RX[6] << 16) | (RX[5] << 8) | RX[4]);
-  float uncomp_pres = (float)((RX[3] << 16) | (RX[2] << 8) | RX[1]);
+	float uncomp_temp = (float)((RX[6] << 16) | (RX[5] << 8) | RX[4]);
+	float uncomp_pres = (float)((RX[3] << 16) | (RX[2] << 8) | RX[1]);
 
-  compensate_temperature(bmp388, bmp388_comp, uncomp_temp);
-  compensate_pressure(bmp388, bmp388_comp, uncomp_pres);
+	compensate_temperature(bmp388, bmp388_comp, uncomp_temp);
+	compensate_pressure(bmp388, bmp388_comp, uncomp_pres);
 
-  return BMP388_SUCCESS;
+	return BMP388_SUCCESS;
 }
 
 BMP388_STATUS BMP388_ReadTemp(BMP388 * const bmp388,
-	 	 	 	 	 	 	 	 	 	 	 	 	 	 	BMP388_COMP * const bmp388_comp,
-															SPI_HandleTypeDef * const hspi) {
+							  BMP388_COMP * const bmp388_comp,
+							  SPI_HandleTypeDef * const hspi) {
 	const uint8_t TX[] = { READ | REG_TEMP };
 	uint8_t RX[4] = {0};
 
@@ -151,8 +151,8 @@ BMP388_STATUS BMP388_ReadTemp(BMP388 * const bmp388,
 }
 
 BMP388_STATUS BMP388_ReadPres(BMP388 * const bmp388,
-	 	 	 	 	 	 	 	 	 	 	 	 	 	  BMP388_COMP * const bmp388_comp,
-															SPI_HandleTypeDef * const hspi) {
+							  BMP388_COMP * const bmp388_comp,
+							  SPI_HandleTypeDef * const hspi) {
 	const uint8_t TX[] = { READ | REG_PRES };
 	uint8_t RX[4] = {0};
 
