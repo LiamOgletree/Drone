@@ -1,0 +1,8 @@
+../Core/Src/BMP388.c:33:20:compute_compensations	16	static
+../Core/Src/BMP388.c:51:20:compensate_temperature	32	static
+../Core/Src/BMP388.c:60:20:compensate_pressure	40	static
+../Core/Src/BMP388.c:80:20:transmit_receive	24	static
+../Core/Src/BMP388.c:97:15:BMP388_Setup	64	static
+../Core/Src/BMP388.c:121:15:BMP388_ReadTempPres	56	static
+../Core/Src/BMP388.c:138:15:BMP388_ReadTemp	48	static
+../Core/Src/BMP388.c:153:15:BMP388_ReadPres	48	static

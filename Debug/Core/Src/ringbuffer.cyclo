@@ -1,0 +1,3 @@
+../Core/Src/ringbuffer.c:5:11:RingBuffer_ctor	3
+../Core/Src/ringbuffer.c:21:11:RingBuffer_enqueue	4
+../Core/Src/ringbuffer.c:47:11:RingBuffer_dequeue	3
