@@ -10,15 +10,30 @@
 
 #include "main.h"
 
+/******************************/
+/*           MACROS           */
+/******************************/
+
+#define WRITE           (0x00)
+#define READ            (0x80)
+#define GPIOx           (GPIOB)
+#define GPIO_PINx       (GPIO_PIN_10)
+#define REG_WHO_AM_I    (0x00)
+#define REG_CALIBRATION (0x31)
+#define REG_PWR_CTRL    (0x1B)
+#define REG_OUTPUTS     (0x04)
+#define REG_PRES        (0x04)
+#define REG_TEMP        (0x07)
+#define PRES_ENABLE     (0x01)
+#define TEMP_ENABLE     (0x02)
+#define NORMAL_MODE     (0x30)
+
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+
 typedef struct BMP388 {
     float temperature;
     float pressure;
 } BMP388;
-
-typedef struct BMP388_COMP {
-    float T1, T2, T3,
-          P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11;
-} BMP388_COMP;
 
 typedef enum {
     BMP388_SUCCESS,
