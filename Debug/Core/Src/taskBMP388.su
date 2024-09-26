@@ -1,1 +1,5 @@
-../Core/Src/taskBMP388.c:12:6:StartTaskBMP388	152	static
+../Core/Src/taskBMP388.c:43:20:report_error	64	static
+../Core/Src/taskBMP388.c:52:20:send_update	64	static
+../Core/Src/taskBMP388.c:65:13:StartTaskTemperature	56	static
+../Core/Src/taskBMP388.c:85:13:StartTaskPressure	56	static
+../Core/Src/taskBMP388.c:105:6:StartTaskBMP388	48	static

@@ -1,1 +1,2 @@
-../Core/Src/taskUART.c:14:6:StartTaskUART	272	static
+../Core/Src/taskUART.c:21:27:transmit	16	static
+../Core/Src/taskUART.c:39:6:StartTaskUART	312	static

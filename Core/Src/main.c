@@ -53,35 +53,35 @@ UART_HandleTypeDef huart2;
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
-  .stack_size = 1024 * 4,
+  .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for TaskUART */
 osThreadId_t TaskUARTHandle;
 const osThreadAttr_t TaskUART_attributes = {
   .name = "TaskUART",
-  .stack_size = 2048 * 4,
+  .stack_size = 1024 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for TaskBMP388 */
 osThreadId_t TaskBMP388Handle;
 const osThreadAttr_t TaskBMP388_attributes = {
   .name = "TaskBMP388",
-  .stack_size = 2048 * 4,
+  .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityNormal1,
 };
 /* Definitions for TaskLIS2MDL */
 osThreadId_t TaskLIS2MDLHandle;
 const osThreadAttr_t TaskLIS2MDL_attributes = {
   .name = "TaskLIS2MDL",
-  .stack_size = 2048 * 4,
+  .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for TaskLSM6DSO32 */
 osThreadId_t TaskLSM6DSO32Handle;
 const osThreadAttr_t TaskLSM6DSO32_attributes = {
   .name = "TaskLSM6DSO32",
-  .stack_size = 2048 * 4,
+  .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for uartSemaphore */
@@ -92,10 +92,11 @@ const osSemaphoreAttr_t uartSemaphore_attributes = {
 /* USER CODE BEGIN PV */
 RingBuffer uart_rb;
 RingBuffer_t rb_buf[64];
-SENSOR_ARGS sensor_args = {.hspi = &hspi1,
-													 .huart = &huart2,
-													 .uart_rb = &uart_rb,
-													 .uartSemaphore = &uartSemaphoreHandle};
+SENSOR_ARGS _sensor_args = {.hspi = &hspi1,
+                            .huart = &huart2,
+                            .uart_rb = &uart_rb,
+                            .uartSemaphore = &uartSemaphoreHandle};
+SENSOR_ARGS const * const sensor_args = &_sensor_args;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -183,16 +184,16 @@ int main(void)
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
   /* creation of TaskUART */
-  TaskUARTHandle = osThreadNew(StartTaskUART, (void*) &sensor_args, &TaskUART_attributes);
+  TaskUARTHandle = osThreadNew(StartTaskUART, (void*) sensor_args, &TaskUART_attributes);
 
   /* creation of TaskBMP388 */
-  TaskBMP388Handle = osThreadNew(StartTaskBMP388, (void*) &sensor_args, &TaskBMP388_attributes);
+  TaskBMP388Handle = osThreadNew(StartTaskBMP388, (void*) sensor_args, &TaskBMP388_attributes);
 
   /* creation of TaskLIS2MDL */
-  TaskLIS2MDLHandle = osThreadNew(StartTaskLIS2MDL, (void*) &sensor_args, &TaskLIS2MDL_attributes);
+  TaskLIS2MDLHandle = osThreadNew(StartTaskLIS2MDL, (void*) sensor_args, &TaskLIS2MDL_attributes);
 
   /* creation of TaskLSM6DSO32 */
-  TaskLSM6DSO32Handle = osThreadNew(StartTaskLSM6DSO32, (void*) &sensor_args, &TaskLSM6DSO32_attributes);
+  TaskLSM6DSO32Handle = osThreadNew(StartTaskLSM6DSO32, (void*) sensor_args, &TaskLSM6DSO32_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -289,7 +290,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;

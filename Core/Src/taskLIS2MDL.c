@@ -9,25 +9,49 @@
 #include "sensor.h"
 #include "LIS2MDL.h"
 
-void StartTaskLIS2MDL(void *argument) {
+/******************************/
+/*      HELPER FUNCTIONS      */
+/******************************/
 
-    SENSOR_ARGS args = *(SENSOR_ARGS*)argument;
-    LIS2MDL lis2mdl;
+static inline void report_error(SENSOR_ARGS const args,
+                                char * const message)
+{
+    RingBuffer_t const tmp = {.type = UPDATE_ERROR,
+                              .error_buf = message};
+    RingBuffer_enqueue(args.uart_rb, tmp);
+    osSemaphoreRelease(*args.uartSemaphore);
+}
 
-    if(LIS2MDL_Setup(&lis2mdl, args.hspi) != LIS2MDL_SUCCESS) {
-        // do nothing for now
+static inline void send_update(SENSOR_ARGS const args,
+                               LIS2MDL const lis2mdl)
+{
+    RingBuffer_t const tmp = {.type = UPDATE_LIS2MDL,
+                              .lis2mdl = lis2mdl};
+    RingBuffer_enqueue(args.uart_rb, tmp);
+    osSemaphoreRelease(*args.uartSemaphore);
+}
+
+/******************************/
+/*       CORE FUNCTIONS       */
+/******************************/
+
+void StartTaskLIS2MDL(void *argument)
+{
+    SENSOR_ARGS const args = *(SENSOR_ARGS*)argument;
+
+    if(LIS2MDL_Setup(args.hspi) != LIS2MDL_SUCCESS) {
+        report_error(args, "LIS2MDL SETUP ERROR");
+        vTaskSuspend(NULL);
     }
 
+    LIS2MDL lis2mdl;
     for(;;) {
         if(LIS2MDL_Read(&lis2mdl, args.hspi) != LIS2MDL_SUCCESS) {
-            // do nothing for now
+            report_error(args, "LIS2MDL READ ERROR");
+            vTaskSuspend(NULL);
         }
 
-        RingBuffer_enqueue(args.uart_rb,
-                           (RingBuffer_t){.type = UPDATE_LIS2MDL,
-                                          .lis2mdl = lis2mdl});
-        osSemaphoreRelease(*args.uartSemaphore);
-
+        send_update(args, lis2mdl);
         osDelay(125);
     }
 }

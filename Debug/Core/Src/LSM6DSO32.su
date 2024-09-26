@@ -1,4 +1,7 @@
-../Core/Src/LSM6DSO32.c:33:20:transmit_receive	24	static
-../Core/Src/LSM6DSO32.c:46:20:transmit	24	static
-../Core/Src/LSM6DSO32.c:60:18:LSM6DSO32_Setup	24	static
-../Core/Src/LSM6DSO32.c:80:18:LSM6DSO32_Read	40	static
+../Core/Src/LSM6DSO32.c:39:25:transmit_receive	32	static
+../Core/Src/LSM6DSO32.c:62:25:transmit	32	static
+../Core/Src/LSM6DSO32.c:83:18:LSM6DSO32_Setup	40	static
+../Core/Src/LSM6DSO32.c:117:18:LSM6DSO32_ReadGyro	48	static
+../Core/Src/LSM6DSO32.c:153:18:LSM6DSO32_ReadAccel	48	static
+../Core/Src/LSM6DSO32.c:189:18:LSM6DSO32_CalibrateOffset	48	static
+../Core/Src/LSM6DSO32.c:222:18:LSM6DSO32_UseOffset	16	static

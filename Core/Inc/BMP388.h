@@ -10,9 +10,17 @@
 
 #include "main.h"
 
+typedef enum {
+    BMP388_TEMPERATURE,
+    BMP388_PRESSURE
+} BMP388_SENSOR;
+
 typedef struct BMP388 {
-    float temperature;
-    float pressure;
+    BMP388_SENSOR sensor;
+    union {
+        float temperature;
+        float pressure;
+    };
 } BMP388;
 
 typedef struct BMP388_COMP {
@@ -25,17 +33,20 @@ typedef enum {
     BMP388_FAILURE
 } BMP388_STATUS;
 
-BMP388_STATUS BMP388_Setup(BMP388 * const bmp388,
-                           BMP388_COMP * const bmp388_comp,
+typedef enum {
+    BMP388_RAW,
+    BMP388_COMPENSATED
+} BMP388_DATA_TYPE;
+
+BMP388_STATUS BMP388_Setup(BMP388_COMP * const bmp388_comp,
                            SPI_HandleTypeDef * const hspi);
-BMP388_STATUS BMP388_ReadTempPres(BMP388 * const bmp388,
-                                  BMP388_COMP * const bmp388_comp,
-                                  SPI_HandleTypeDef * const hspi);
 BMP388_STATUS BMP388_ReadTemp(BMP388 * const bmp388,
-                              BMP388_COMP * const bmp388_comp,
+                              BMP388_COMP const * const bmp388_comp,
+                              BMP388_DATA_TYPE const data_type,
                               SPI_HandleTypeDef * const hspi);
 BMP388_STATUS BMP388_ReadPres(BMP388 * const bmp388,
-                              BMP388_COMP * const bmp388_comp,
+                              BMP388_COMP const * const bmp388_comp,
+                              BMP388_DATA_TYPE const data_type,
                               SPI_HandleTypeDef * const hspi);
 
 #endif /* SRC_BMP388_H_ */

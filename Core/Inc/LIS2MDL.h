@@ -12,6 +12,7 @@
 
 typedef struct LIS2MDL {
     int16_t X, Y, Z;
+    float heading;
 } LIS2MDL;
 
 typedef enum {
@@ -19,8 +20,7 @@ typedef enum {
     LIS2MDL_FAILURE
 } LIS2MDL_STATUS;
 
-LIS2MDL_STATUS LIS2MDL_Setup(LIS2MDL * const lis2mdl,
-                             SPI_HandleTypeDef * const hspi);
+LIS2MDL_STATUS LIS2MDL_Setup(SPI_HandleTypeDef * const hspi);
 LIS2MDL_STATUS LIS2MDL_Read(LIS2MDL * const lis2mdl,
                             SPI_HandleTypeDef * const hspi);
 

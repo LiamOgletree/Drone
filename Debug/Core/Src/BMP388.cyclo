@@ -1,8 +1,7 @@
-../Core/Src/BMP388.c:33:20:compute_compensations	1
-../Core/Src/BMP388.c:51:20:compensate_temperature	1
-../Core/Src/BMP388.c:60:20:compensate_pressure	1
-../Core/Src/BMP388.c:80:20:transmit_receive	1
-../Core/Src/BMP388.c:97:15:BMP388_Setup	2
-../Core/Src/BMP388.c:121:15:BMP388_ReadTempPres	1
-../Core/Src/BMP388.c:138:15:BMP388_ReadTemp	1
-../Core/Src/BMP388.c:153:15:BMP388_ReadPres	1
+../Core/Src/BMP388.c:33:13:compute_compensations	1
+../Core/Src/BMP388.c:52:13:compensate_temperature	1
+../Core/Src/BMP388.c:62:13:compensate_pressure	1
+../Core/Src/BMP388.c:83:22:transmit_receive	3
+../Core/Src/BMP388.c:110:15:BMP388_Setup	4
+../Core/Src/BMP388.c:143:15:BMP388_ReadTemp	4
+../Core/Src/BMP388.c:173:15:BMP388_ReadPres	4

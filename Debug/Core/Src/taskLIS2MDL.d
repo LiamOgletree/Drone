@@ -1,5 +1,6 @@
 Core/Src/taskLIS2MDL.o: ../Core/Src/taskLIS2MDL.c \
- ../Core/Inc/taskLIS2MDL.h ../Core/Inc/sensor.h ../Core/Inc/main.h \
+ ../Core/Inc/taskLIS2MDL.h ../Core/Inc/sensor.h \
+ ../Core/Inc/ringbufferUART.h ../Core/Inc/main.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  ../Core/Inc/stm32f4xx_hal_conf.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \
@@ -29,6 +30,7 @@ Core/Src/taskLIS2MDL.o: ../Core/Src/taskLIS2MDL.c \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
+ ../Core/Inc/BMP388.h ../Core/Inc/LIS2MDL.h ../Core/Inc/LSM6DSO32.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h \
  ../Core/Inc/FreeRTOSConfig.h \
@@ -40,10 +42,10 @@ Core/Src/taskLIS2MDL.o: ../Core/Src/taskLIS2MDL.c \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h \
- ../Core/Inc/ringbuffer.h ../Core/Inc/BMP388.h ../Core/Inc/LIS2MDL.h \
- ../Core/Inc/LSM6DSO32.h ../Core/Inc/LIS2MDL.h
+ ../Core/Inc/LIS2MDL.h
 ../Core/Inc/taskLIS2MDL.h:
 ../Core/Inc/sensor.h:
+../Core/Inc/ringbufferUART.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
@@ -74,6 +76,9 @@ Core/Src/taskLIS2MDL.o: ../Core/Src/taskLIS2MDL.c \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:
+../Core/Inc/BMP388.h:
+../Core/Inc/LIS2MDL.h:
+../Core/Inc/LSM6DSO32.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
 ../Core/Inc/FreeRTOSConfig.h:
@@ -85,8 +90,4 @@ Core/Src/taskLIS2MDL.o: ../Core/Src/taskLIS2MDL.c \
 ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h:
-../Core/Inc/ringbuffer.h:
-../Core/Inc/BMP388.h:
-../Core/Inc/LIS2MDL.h:
-../Core/Inc/LSM6DSO32.h:
 ../Core/Inc/LIS2MDL.h:

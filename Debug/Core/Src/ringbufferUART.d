@@ -1,5 +1,6 @@
-Core/Src/ringbuffer.o: ../Core/Src/ringbuffer.c ../Core/Inc/ringbuffer.h \
- ../Core/Inc/main.h ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
+Core/Src/ringbufferUART.o: ../Core/Src/ringbufferUART.c \
+ ../Core/Inc/ringbufferUART.h ../Core/Inc/main.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  ../Core/Inc/stm32f4xx_hal_conf.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h \
@@ -29,7 +30,7 @@ Core/Src/ringbuffer.o: ../Core/Src/ringbuffer.c ../Core/Inc/ringbuffer.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
  ../Core/Inc/BMP388.h ../Core/Inc/LIS2MDL.h ../Core/Inc/LSM6DSO32.h
-../Core/Inc/ringbuffer.h:
+../Core/Inc/ringbufferUART.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:

@@ -39,7 +39,7 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h \
- ../Core/Inc/sensor.h ../Core/Inc/main.h ../Core/Inc/ringbuffer.h \
+ ../Core/Inc/sensor.h ../Core/Inc/ringbufferUART.h ../Core/Inc/main.h \
  ../Core/Inc/BMP388.h ../Core/Inc/LIS2MDL.h ../Core/Inc/LSM6DSO32.h \
  ../Core/Inc/taskUART.h ../Core/Inc/taskBMP388.h \
  ../Core/Inc/taskLIS2MDL.h ../Core/Inc/taskLSM6DSO32.h
@@ -85,8 +85,8 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h:
 ../Core/Inc/sensor.h:
+../Core/Inc/ringbufferUART.h:
 ../Core/Inc/main.h:
-../Core/Inc/ringbuffer.h:
 ../Core/Inc/BMP388.h:
 ../Core/Inc/LIS2MDL.h:
 ../Core/Inc/LSM6DSO32.h:
