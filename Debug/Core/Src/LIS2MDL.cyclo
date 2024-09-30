@@ -1,4 +1,4 @@
-../Core/Src/LIS2MDL.c:31:23:transmit_receive	3
-../Core/Src/LIS2MDL.c:54:23:transmit	2
-../Core/Src/LIS2MDL.c:75:16:LIS2MDL_Setup	4
-../Core/Src/LIS2MDL.c:105:16:LIS2MDL_Read	2
+../Core/Src/LIS2MDL.c:36:23:transmit_receive	3
+../Core/Src/LIS2MDL.c:67:23:transmit	2
+../Core/Src/LIS2MDL.c:92:16:LIS2MDL_Setup	4
+../Core/Src/LIS2MDL.c:122:16:LIS2MDL_Read	2

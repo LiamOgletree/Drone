@@ -9,6 +9,11 @@
 #include "cmsis_os.h"
 #include "sensor.h"
 
+// TODO:
+//  1. Add more precise error codes instead of blanket LSM6DSO32_FAILURE.
+//  2. Refine HAL_TIMEOUT (set to ~100 ms right now).
+//  3. Incorporate UseOffset into existing Read functions.
+
 /******************************/
 /*           MACROS           */
 /******************************/
@@ -30,6 +35,7 @@
 #define SET_REG_CTRL4_DEFAULT           (0x00)
 #define SET_REG_CTRL5_DEFAULT           (0x00)
 #define SET_REG_CTRL6_DEFAULT           (0x00)
+#define HAL_TIMEOUT                     ((uint32_t)1600000)
 
 
 /******************************/
@@ -46,10 +52,18 @@ static LSM6DSO32_STATUS transmit_receive(uint8_t const * const TX,
 
     taskENTER_CRITICAL();
     HAL_GPIO_WritePin(GPIOx, GPIO_PINx, GPIO_PIN_RESET);
-    if(HAL_SPI_Transmit(hspi, (uint8_t *)TX, NUM_TX, HAL_MAX_DELAY) != HAL_OK) {
+    if(HAL_SPI_Transmit(hspi,
+                        (uint8_t *)TX,
+                        NUM_TX,
+                        HAL_TIMEOUT)
+                        != HAL_OK) {
         status = LSM6DSO32_FAILURE;
     } else {
-        if(HAL_SPI_Receive(hspi, (uint8_t *)RX, NUM_RX, HAL_MAX_DELAY) != HAL_OK) {
+        if(HAL_SPI_Receive(hspi,
+                           (uint8_t *)RX,
+                           NUM_RX,
+                           HAL_TIMEOUT)
+                           != HAL_OK) {
             status = LSM6DSO32_FAILURE;
         }
     }
@@ -67,7 +81,11 @@ static LSM6DSO32_STATUS transmit(uint8_t const * const TX,
 
     taskENTER_CRITICAL();
     HAL_GPIO_WritePin(GPIOx, GPIO_PINx, GPIO_PIN_RESET);
-    if(HAL_SPI_Transmit(hspi, (uint8_t *)TX, NUM_TX, HAL_MAX_DELAY) != HAL_OK) {
+    if(HAL_SPI_Transmit(hspi,
+                        (uint8_t *)TX,
+                        NUM_TX,
+                        HAL_TIMEOUT)
+                        != HAL_OK) {
         status = LSM6DSO32_FAILURE;
     }
     HAL_GPIO_WritePin(GPIOx, GPIO_PINx, GPIO_PIN_SET);

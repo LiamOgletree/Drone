@@ -8,6 +8,11 @@
 #include "taskBMP388.h"
 #include "sensor.h"
 #include "BMP388.h"
+#include <stdbool.h>
+
+// TODO:
+//  1. Try to find some way to get rid of global variables, if it makes sense.
+//  2. Try to recover BMP388 functionality instead of suspending task.
 
 /******************************/
 /*           MACROS           */
@@ -34,6 +39,11 @@ osThreadAttr_t const TaskPres_attributes = {
     .name = "TaskPres",
     .stack_size = 1024 * 4,
     .priority = (osPriority_t) osPriorityNormal1,
+};
+
+osSemaphoreId_t bmp388SemaphoreHandle;
+const osSemaphoreAttr_t bmp388Semaphore_attributes = {
+  .name = "bmp388Semaphore"
 };
 
 /******************************/
@@ -67,12 +77,22 @@ static void StartTaskTemperature(void *argument)
     SENSOR_ARGS const args = *(SENSOR_ARGS*)argument;
     BMP388 bmp388 = {.sensor = BMP388_TEMPERATURE};
 
+    // Initial temperature read to update global temperature variable
+    //  in bmp388.c for pressure compensations.
+    if(BMP388_ReadTemp(&bmp388, &bmp388_comp, TEMPERATURE_DATA_TYPE,
+                       args.hspi) != BMP388_SUCCESS) {
+        report_error(args, "TEMPERATURE READ ERROR");
+        vTaskSuspend(NULL);
+    }
+
+    // Let pressure task know it can start, because initial temperature
+    //  is received and available for pressure compensation.
+    osSemaphoreRelease(bmp388SemaphoreHandle);
+
+    // Update temperature reading once per second.
     for(;;) {
-        if(BMP388_ReadTemp(&bmp388,
-                           &bmp388_comp,
-                           TEMPERATURE_DATA_TYPE,
-                           args.hspi)
-                           != BMP388_SUCCESS) {
+        if(BMP388_ReadTemp(&bmp388, &bmp388_comp, TEMPERATURE_DATA_TYPE,
+                           args.hspi) != BMP388_SUCCESS) {
             report_error(args, "TEMPERATURE READ ERROR");
             vTaskSuspend(NULL);
         }
@@ -87,6 +107,11 @@ static void StartTaskPressure(void *argument)
     SENSOR_ARGS const args = *(SENSOR_ARGS*)argument;
     BMP388 bmp388 = {.sensor = BMP388_PRESSURE};
 
+    // Wait for temperature task to run once and provide a value for
+    //  compensate_pressure function to work.
+    osSemaphoreAcquire(bmp388SemaphoreHandle, osWaitForever);
+
+    // Update pressure reading 40 times per second.
     for(;;) {
         if(BMP388_ReadPres(&bmp388,
                            &bmp388_comp,
@@ -111,6 +136,7 @@ void StartTaskBMP388(void *argument)
         vTaskSuspend(NULL);
     }
 
+    bmp388SemaphoreHandle = osSemaphoreNew(1, 0, &bmp388Semaphore_attributes);
     TaskTemperatureHandle = osThreadNew(StartTaskTemperature,
                                         (void*) argument,
                                         &TaskTemp_attributes);

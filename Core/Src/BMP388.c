@@ -8,6 +8,10 @@
 #include "bmp388.h"
 #include "cmsis_os.h"
 
+// TODO:
+//  1. Add more precise error codes instead of blanket BMP388_FAILURE.
+//  2. Refine HAL_TIMEOUT (set to ~100 ms right now).
+
 /******************************/
 /*           MACROS           */
 /******************************/
@@ -25,6 +29,13 @@
 #define ENABLE_PRESSURE     (0x01)
 #define ENABLE_TEMPERATURE  (0x02)
 #define NORMAL_MODE         (0x30)
+#define HAL_TIMEOUT         ((uint32_t)1600000)
+
+/******************************/
+/*          GLOBALS           */
+/******************************/
+
+volatile float global_temperature;
 
 /******************************/
 /*      HELPER FUNCTIONS      */
@@ -57,13 +68,15 @@ static void compensate_temperature(BMP388 * const bmp388,
     bmp388->temperature = \
         (partial_data1 * bmp388_comp->T2) + \
         (partial_data1 * partial_data1) * bmp388_comp->T3;
+    // Set volatile temperature variable for compensate_pressure function.
+    global_temperature = bmp388->temperature;
 }
 
 static void compensate_pressure(BMP388 * const bmp388,
                                 BMP388_COMP const * const bmp388_comp,
                                 float const uncomp_pres)
 {
-    float const temperature = bmp388->temperature;
+    float const temperature = global_temperature;
     float const partial_out1 = \
         (bmp388_comp->P5) + \
         (bmp388_comp->P6 * temperature) + \
@@ -90,11 +103,19 @@ static BMP388_STATUS transmit_receive(uint8_t const * const TX,
 
     taskENTER_CRITICAL();
     HAL_GPIO_WritePin(GPIOx, GPIO_PINx, GPIO_PIN_RESET);
-    if(HAL_SPI_Transmit(hspi, (uint8_t *)TX, NUM_TX, HAL_MAX_DELAY) != HAL_OK) {
-        status = BMP388_FAILURE;
+    if(HAL_SPI_Transmit(hspi,
+                        (uint8_t *)TX,
+                        NUM_TX,
+                        HAL_TIMEOUT)
+                        != HAL_OK) {
+        status = BMP388_SPI_TX_FAILURE;
     } else {
-        if(HAL_SPI_Receive(hspi, (uint8_t *)RX, NUM_RX, HAL_MAX_DELAY) != HAL_OK) {
-            status = BMP388_FAILURE;
+        if(HAL_SPI_Receive(hspi,
+                           (uint8_t *)RX,
+                           NUM_RX,
+                           HAL_TIMEOUT)
+                           != HAL_OK) {
+            status = BMP388_SPI_RX_FAILURE;
         }
     }
     HAL_GPIO_WritePin(GPIOx, GPIO_PINx, GPIO_PIN_SET);
@@ -114,13 +135,17 @@ BMP388_STATUS BMP388_Setup(BMP388_COMP * const bmp388_comp,
     uint8_t const TX1[] = { READ | REG_WHO_AM_I };
     uint8_t RX[22] = {0};
 
-    if(transmit_receive(TX1, sizeof(TX1) / sizeof(TX1[0]),
-                        RX,  sizeof(RX)  / sizeof(RX[0]),
-                        hspi) != BMP388_SUCCESS) {
-        return BMP388_FAILURE;
+    BMP388_STATUS status;
+
+    status = transmit_receive(TX1, sizeof(TX1) / sizeof(TX1[0]),
+                              RX,  sizeof(RX)  / sizeof(RX[0]), hspi);
+    if(status != BMP388_SUCCESS) {
+        return status;
     }
 
-    if(RX[1] != 0x50) return BMP388_FAILURE;
+    if(RX[1] != 0x50) {
+        return BMP388_WHOAMI_FAILURE;
+    }
 
     // Otherwise, configure the sensor and receive calibration values.
     uint8_t const TX2[] = {
@@ -129,10 +154,10 @@ BMP388_STATUS BMP388_Setup(BMP388_COMP * const bmp388_comp,
         READ  | REG_CALIBRATION
     };
 
-    if(transmit_receive(TX2, sizeof(TX2) / sizeof(TX2[0]),
-                        RX,  sizeof(RX)  / sizeof(RX[0]),
-                        hspi) != BMP388_SUCCESS) {
-        return BMP388_FAILURE;
+    status = transmit_receive(TX2, sizeof(TX2) / sizeof(TX2[0]),
+                              RX,  sizeof(RX)  / sizeof(RX[0]), hspi);
+    if(status != BMP388_SUCCESS) {
+        return status;
     }
 
     compute_compensations(bmp388_comp, RX);

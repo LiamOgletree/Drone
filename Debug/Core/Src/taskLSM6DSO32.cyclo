@@ -1,5 +1,5 @@
-../Core/Src/taskLSM6DSO32.c:42:20:report_error	1
-../Core/Src/taskLSM6DSO32.c:51:20:send_update	1
-../Core/Src/taskLSM6DSO32.c:64:13:StartTaskGyroscope	2
-../Core/Src/taskLSM6DSO32.c:83:13:StartTaskAccelerometer	2
-../Core/Src/taskLSM6DSO32.c:110:6:StartTaskLSM6DSO32	2
+../Core/Src/taskLSM6DSO32.c:46:20:report_error	1
+../Core/Src/taskLSM6DSO32.c:55:20:send_update	1
+../Core/Src/taskLSM6DSO32.c:68:13:StartTaskGyroscope	2
+../Core/Src/taskLSM6DSO32.c:87:13:StartTaskAccelerometer	2
+../Core/Src/taskLSM6DSO32.c:114:6:StartTaskLSM6DSO32	2

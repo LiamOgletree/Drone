@@ -9,6 +9,10 @@
 #include "cmsis_os.h"
 #include "math.h"
 
+// TODO:
+//  1. Add more precise error codes instead of blanket LIS2MDL_FAILURE.
+//  2. Refine HAL_TIMEOUT (set to ~100 ms right now).
+
 /******************************/
 /*           MACROS           */
 /******************************/
@@ -23,6 +27,7 @@
 #define REG_WHO_AM_I    (0x4F)
 #define REG_CONFIGS     (0x60)
 #define REG_OUTPUTS     (0x68)
+#define HAL_TIMEOUT     ((uint32_t)1600000)
 
 /******************************/
 /*      HELPER FUNCTIONS      */
@@ -38,10 +43,18 @@ static LIS2MDL_STATUS transmit_receive(uint8_t const * const TX,
 
     taskENTER_CRITICAL();
     HAL_GPIO_WritePin(GPIOx, GPIO_PINx, GPIO_PIN_RESET);
-    if(HAL_SPI_Transmit(hspi, (uint8_t *)TX, NUM_TX, HAL_MAX_DELAY) != HAL_OK) {
+    if(HAL_SPI_Transmit(hspi,
+                        (uint8_t *)TX,
+                        NUM_TX,
+                        HAL_TIMEOUT)
+                        != HAL_OK) {
         status = LIS2MDL_FAILURE;
     } else {
-        if(HAL_SPI_Receive(hspi, (uint8_t *)RX, NUM_RX, HAL_MAX_DELAY) != HAL_OK) {
+        if(HAL_SPI_Receive(hspi,
+                           (uint8_t *)RX,
+                           NUM_RX,
+                           HAL_TIMEOUT)
+                           != HAL_OK) {
             status = LIS2MDL_FAILURE;
         }
     }
@@ -59,7 +72,11 @@ static LIS2MDL_STATUS transmit(uint8_t const * const TX,
 
     taskENTER_CRITICAL();
     HAL_GPIO_WritePin(GPIOx, GPIO_PINx, GPIO_PIN_RESET);
-    if(HAL_SPI_Transmit(hspi, (uint8_t *)TX, NUM_TX, HAL_MAX_DELAY) != HAL_OK) {
+    if(HAL_SPI_Transmit(hspi,
+                        (uint8_t *)TX,
+                        NUM_TX,
+                        HAL_TIMEOUT)
+                        != HAL_OK) {
         status = LIS2MDL_FAILURE;
     }
     HAL_GPIO_WritePin(GPIOx, GPIO_PINx, GPIO_PIN_SET);

@@ -9,6 +9,9 @@
 #include "sensor.h"
 #include "LIS2MDL.h"
 
+// TODO:
+//  1. Try to recover LIS2MDL functionality instead of suspending task.
+
 /******************************/
 /*      HELPER FUNCTIONS      */
 /******************************/

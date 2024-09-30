@@ -9,6 +9,10 @@
 #include "sensor.h"
 #include "LSM6DSO32.h"
 
+// TODO:
+//  1. Try to find some way to get rid of global variables, if it makes sense.
+//  2. Try to recover LSM6DSO32 functionality instead of suspending task.
+
 /******************************/
 /*           MACROS           */
 /******************************/

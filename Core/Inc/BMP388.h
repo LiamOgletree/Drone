@@ -30,7 +30,10 @@ typedef struct BMP388_COMP {
 
 typedef enum {
     BMP388_SUCCESS,
-    BMP388_FAILURE
+    BMP388_FAILURE,
+    BMP388_SPI_TX_FAILURE,
+    BMP388_SPI_RX_FAILURE,
+    BMP388_WHOAMI_FAILURE
 } BMP388_STATUS;
 
 typedef enum {

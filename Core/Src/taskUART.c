@@ -12,14 +12,17 @@
 #include <string.h>
 
 // TODO:
-//  1. Determine appropriate value instead of HAL_MAX_DELAY.
+//  1. Determine appropriate value for HAL_TIMEOUT instead of ~100 ms.
+//  2. Instead of suspending task, try to recover UART functionality.
+//  3. Try to find some way to make long sprintf statements with lots of
+//     /n and /r characters readable.
 
 /******************************/
 /*      HELPER FUNCTIONS      */
 /******************************/
 
 static inline UART_STATUS transmit(UART_HandleTypeDef * const huart,
-                                   char * buf)
+                                   char * const buf)
 {
     if(HAL_UART_Transmit(huart,
                          (uint8_t*)buf,
