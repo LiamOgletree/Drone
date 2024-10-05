@@ -102,7 +102,7 @@ static BMP388_STATUS transmit_receive(uint8_t const * const TX,
     BMP388_STATUS status = BMP388_SUCCESS;
 
     taskENTER_CRITICAL();
-    HAL_GPIO_WritePin(GPIOx, GPIO_PINx, GPIO_PIN_RESET);
+    GPIOx->BSRR = (uint32_t)GPIO_PINx << 16U;
     if(HAL_SPI_Transmit(hspi,
                         (uint8_t *)TX,
                         NUM_TX,
@@ -118,7 +118,7 @@ static BMP388_STATUS transmit_receive(uint8_t const * const TX,
             status = BMP388_SPI_RX_FAILURE;
         }
     }
-    HAL_GPIO_WritePin(GPIOx, GPIO_PINx, GPIO_PIN_SET);
+    GPIOx->BSRR = GPIO_PINx;
     taskEXIT_CRITICAL();
 
     return status;
@@ -179,6 +179,8 @@ BMP388_STATUS BMP388_ReadTemp(BMP388 * const bmp388,
         return BMP388_FAILURE;
     }
 
+    bmp388->timestamp = TIM5->CNT;
+
     float const uncomp_temp = (float)((RX[3] << 16) | (RX[2] << 8) | RX[1]);
 
     switch (data_type) {
@@ -208,6 +210,8 @@ BMP388_STATUS BMP388_ReadPres(BMP388 * const bmp388,
                         hspi) != BMP388_SUCCESS) {
         return BMP388_FAILURE;
     }
+
+    bmp388->timestamp = TIM5->CNT;
 
     float const uncomp_pres = (float)((RX[3] << 16) | (RX[2] << 8) | RX[1]);
 

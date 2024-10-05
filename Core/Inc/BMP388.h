@@ -17,6 +17,7 @@ typedef enum {
 
 typedef struct BMP388 {
     BMP388_SENSOR sensor;
+    uint32_t timestamp;
     union {
         float temperature;
         float pressure;

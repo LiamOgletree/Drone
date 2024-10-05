@@ -1,5 +1,5 @@
 ../Core/Src/taskBMP388.c:53:20:report_error	1
-../Core/Src/taskBMP388.c:62:20:send_update	1
-../Core/Src/taskBMP388.c:75:13:StartTaskTemperature	3
-../Core/Src/taskBMP388.c:105:13:StartTaskPressure	2
-../Core/Src/taskBMP388.c:130:6:StartTaskBMP388	2
+../Core/Src/taskBMP388.c:70:20:send_update	1
+../Core/Src/taskBMP388.c:91:13:StartTemperature	3
+../Core/Src/taskBMP388.c:130:13:StartPressure	2
+../Core/Src/taskBMP388.c:164:6:StartBMP388	2

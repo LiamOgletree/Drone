@@ -12,6 +12,7 @@
 
 typedef struct LIS2MDL {
     int16_t X, Y, Z;
+    uint32_t timestamp;
     float heading;
 } LIS2MDL;
 

@@ -8,6 +8,6 @@
 #ifndef INC_TASKLSM6DSO32_H_
 #define INC_TASKLSM6DSO32_H_
 
-void StartTaskLSM6DSO32(void *argument);
+void StartLSM6DSO32(void *argument);
 
 #endif /* INC_TASKLSM6DSO32_H_ */

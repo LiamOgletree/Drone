@@ -1,13 +1,13 @@
 
 #include <ringbufferUART.h>
 
-RB_STATUS RingBuffer_ctor(RingBuffer * const rb,
-                          uint32_t const capacity,
-                          RingBuffer_t * const buffer)
+RB_STATUS_UART RingBufferUART_ctor(RingBufferUART * const rb,
+                                   uint32_t const capacity,
+                                   RingBufferUART_t * const buffer)
 {
     // If capacity is 0 or buffer is a nullptr, return failure.
     if(!capacity || !buffer) {
-        return RB_FAILURE;
+        return RB_UART_FAILURE;
     }
     // Else, initialize values and return success.
     rb->capacity = capacity;
@@ -16,11 +16,11 @@ RB_STATUS RingBuffer_ctor(RingBuffer * const rb,
     rb->head     = (uint32_t)0;
     rb->tail     = (uint32_t)0;
 
-    return RB_SUCCESS;
+    return RB_UART_SUCCESS;
 }
 
-RB_STATUS RingBuffer_enqueue(RingBuffer * const rb,
-                             RingBuffer_t const item)
+RB_STATUS_UART RingBufferUART_enqueue(RingBufferUART * const rb,
+                                      RingBufferUART_t const item)
 {
     // Add item to head end of RingBuffer. Overwrite old data if necessary.
     rb->buffer[rb->head] = item;
@@ -38,15 +38,15 @@ RB_STATUS RingBuffer_enqueue(RingBuffer * const rb,
         }
     }
     // Return success to calling function.
-    return RB_SUCCESS;
+    return RB_UART_SUCCESS;
 }
 
-RB_STATUS RingBuffer_dequeue(RingBuffer * const rb,
-                             RingBuffer_t * const item)
+RB_STATUS_UART RingBufferUART_dequeue(RingBufferUART * const rb,
+                                      RingBufferUART_t * const item)
 {
     // If RingBuffer is empty, return failure.
     if(!rb->size) {
-        return RB_FAILURE;
+        return RB_UART_FAILURE;
     } else {
         // Otherwise, take item from tail end of RingBuffer.
         *item = rb->buffer[rb->tail];
@@ -58,5 +58,5 @@ RB_STATUS RingBuffer_dequeue(RingBuffer * const rb,
         rb->size--;
     }
     // Return success to calling function.
-    return RB_SUCCESS;
+    return RB_UART_SUCCESS;
 }

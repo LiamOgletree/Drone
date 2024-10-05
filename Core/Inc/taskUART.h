@@ -13,6 +13,6 @@ typedef enum {
     UART_FAILURE
 } UART_STATUS;
 
-void StartTaskUART(void *argument);
+void StartUART(void *argument);
 
 #endif /* INC_TASKUART_H_ */

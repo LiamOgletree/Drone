@@ -2,6 +2,6 @@
 ../Core/Src/LSM6DSO32.c:76:25:transmit	2
 ../Core/Src/LSM6DSO32.c:101:18:LSM6DSO32_Setup	4
 ../Core/Src/LSM6DSO32.c:135:18:LSM6DSO32_ReadGyro	4
-../Core/Src/LSM6DSO32.c:171:18:LSM6DSO32_ReadAccel	4
-../Core/Src/LSM6DSO32.c:207:18:LSM6DSO32_CalibrateOffset	4
-../Core/Src/LSM6DSO32.c:240:18:LSM6DSO32_UseOffset	1
+../Core/Src/LSM6DSO32.c:173:18:LSM6DSO32_ReadAccel	4
+../Core/Src/LSM6DSO32.c:211:18:LSM6DSO32_CalibrateOffset	4
+../Core/Src/LSM6DSO32.c:244:18:LSM6DSO32_UseOffset	1

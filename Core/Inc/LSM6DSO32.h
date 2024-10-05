@@ -17,6 +17,7 @@ typedef enum {
 
 typedef struct LSM6DSO32 {
     LSM6DSO32_SENSOR sensor;
+    uint32_t timestamp;
     float X, Y, Z;
 } LSM6DSO32;
 

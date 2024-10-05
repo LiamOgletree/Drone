@@ -27,6 +27,7 @@
 #include "taskBMP388.h"
 #include "taskLIS2MDL.h"
 #include "taskLSM6DSO32.h"
+#include "taskStateMachine.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -47,6 +48,8 @@
 /* Private variables ---------------------------------------------------------*/
 SPI_HandleTypeDef hspi1;
 
+TIM_HandleTypeDef htim5;
+
 UART_HandleTypeDef huart2;
 
 /* Definitions for defaultTask */
@@ -56,33 +59,45 @@ const osThreadAttr_t defaultTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
-/* Definitions for TaskUART */
-osThreadId_t TaskUARTHandle;
-const osThreadAttr_t TaskUART_attributes = {
-  .name = "TaskUART",
+/* Definitions for RunUART */
+osThreadId_t RunUARTHandle;
+const osThreadAttr_t RunUART_attributes = {
+  .name = "RunUART",
   .stack_size = 1024 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
-/* Definitions for TaskBMP388 */
-osThreadId_t TaskBMP388Handle;
-const osThreadAttr_t TaskBMP388_attributes = {
-  .name = "TaskBMP388",
+/* Definitions for RunBMP388 */
+osThreadId_t RunBMP388Handle;
+const osThreadAttr_t RunBMP388_attributes = {
+  .name = "RunBMP388",
   .stack_size = 512 * 4,
-  .priority = (osPriority_t) osPriorityNormal1,
+  .priority = (osPriority_t) osPriorityNormal,
 };
-/* Definitions for TaskLIS2MDL */
-osThreadId_t TaskLIS2MDLHandle;
-const osThreadAttr_t TaskLIS2MDL_attributes = {
-  .name = "TaskLIS2MDL",
+/* Definitions for RunLIS2MDL */
+osThreadId_t RunLIS2MDLHandle;
+const osThreadAttr_t RunLIS2MDL_attributes = {
+  .name = "RunLIS2MDL",
   .stack_size = 512 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityNormal,
 };
-/* Definitions for TaskLSM6DSO32 */
-osThreadId_t TaskLSM6DSO32Handle;
-const osThreadAttr_t TaskLSM6DSO32_attributes = {
-  .name = "TaskLSM6DSO32",
+/* Definitions for RunLSM6DSO32 */
+osThreadId_t RunLSM6DSO32Handle;
+const osThreadAttr_t RunLSM6DSO32_attributes = {
+  .name = "RunLSM6DSO32",
   .stack_size = 512 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for RunStateMachine */
+osThreadId_t RunStateMachineHandle;
+const osThreadAttr_t RunStateMachine_attributes = {
+  .name = "RunStateMachine",
+  .stack_size = 16384 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for uartMutex */
+osMutexId_t uartMutexHandle;
+const osMutexAttr_t uartMutex_attributes = {
+  .name = "uartMutex"
 };
 /* Definitions for uartSemaphore */
 osSemaphoreId_t uartSemaphoreHandle;
@@ -90,12 +105,13 @@ const osSemaphoreAttr_t uartSemaphore_attributes = {
   .name = "uartSemaphore"
 };
 /* USER CODE BEGIN PV */
-RingBuffer uart_rb;
-RingBuffer_t rb_buf[64];
+RingBufferUART uart_rb;
+RingBufferUART_t uart_rb_buf[64];
 SENSOR_ARGS _sensor_args = {.hspi = &hspi1,
                             .huart = &huart2,
                             .uart_rb = &uart_rb,
-                            .uartSemaphore = &uartSemaphoreHandle};
+                            .uartSemaphore = &uartSemaphoreHandle,
+                            .uartMutex = &uartMutexHandle};
 SENSOR_ARGS const * const sensor_args = &_sensor_args;
 /* USER CODE END PV */
 
@@ -104,11 +120,13 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_SPI1_Init(void);
+static void MX_TIM5_Init(void);
 void StartDefaultTask(void *argument);
-extern void StartTaskUART(void *argument);
-extern void StartTaskBMP388(void *argument);
-extern void StartTaskLIS2MDL(void *argument);
-extern void StartTaskLSM6DSO32(void *argument);
+extern void StartUART(void *argument);
+extern void StartBMP388(void *argument);
+extern void StartLIS2MDL(void *argument);
+extern void StartLSM6DSO32(void *argument);
+extern void StartStateMachine(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -150,14 +168,22 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_SPI1_Init();
+  MX_TIM5_Init();
   /* USER CODE BEGIN 2 */
 
-  RingBuffer_ctor(&uart_rb, 64, rb_buf);
+  RingBufferUART_ctor(&uart_rb, 64, uart_rb_buf);
   HAL_Delay(100);
+
+  RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
+  TIM5->CR1 |= TIM_CR1_CEN;
+
   /* USER CODE END 2 */
 
   /* Init scheduler */
   osKernelInitialize();
+  /* Create the mutex(es) */
+  /* creation of uartMutex */
+  uartMutexHandle = osMutexNew(&uartMutex_attributes);
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
@@ -183,17 +209,20 @@ int main(void)
   /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
-  /* creation of TaskUART */
-  TaskUARTHandle = osThreadNew(StartTaskUART, (void*) sensor_args, &TaskUART_attributes);
+  /* creation of RunUART */
+  RunUARTHandle = osThreadNew(StartUART, (void*) sensor_args, &RunUART_attributes);
 
-  /* creation of TaskBMP388 */
-  TaskBMP388Handle = osThreadNew(StartTaskBMP388, (void*) sensor_args, &TaskBMP388_attributes);
+  /* creation of RunBMP388 */
+  RunBMP388Handle = osThreadNew(StartBMP388, (void*) sensor_args, &RunBMP388_attributes);
 
-  /* creation of TaskLIS2MDL */
-  TaskLIS2MDLHandle = osThreadNew(StartTaskLIS2MDL, (void*) sensor_args, &TaskLIS2MDL_attributes);
+  /* creation of RunLIS2MDL */
+  RunLIS2MDLHandle = osThreadNew(StartLIS2MDL, (void*) sensor_args, &RunLIS2MDL_attributes);
 
-  /* creation of TaskLSM6DSO32 */
-  TaskLSM6DSO32Handle = osThreadNew(StartTaskLSM6DSO32, (void*) sensor_args, &TaskLSM6DSO32_attributes);
+  /* creation of RunLSM6DSO32 */
+  RunLSM6DSO32Handle = osThreadNew(StartLSM6DSO32, (void*) sensor_args, &RunLSM6DSO32_attributes);
+
+  /* creation of RunStateMachine */
+  RunStateMachineHandle = osThreadNew(StartStateMachine, (void*) sensor_args, &RunStateMachine_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -302,6 +331,51 @@ static void MX_SPI1_Init(void)
   /* USER CODE BEGIN SPI1_Init 2 */
 
   /* USER CODE END SPI1_Init 2 */
+
+}
+
+/**
+  * @brief TIM5 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM5_Init(void)
+{
+
+  /* USER CODE BEGIN TIM5_Init 0 */
+
+  /* USER CODE END TIM5_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM5_Init 1 */
+
+  /* USER CODE END TIM5_Init 1 */
+  htim5.Instance = TIM5;
+  htim5.Init.Prescaler = 0;
+  htim5.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim5.Init.Period = 4294967295;
+  htim5.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim5.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim5) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim5, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim5, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM5_Init 2 */
+
+  /* USER CODE END TIM5_Init 2 */
 
 }
 

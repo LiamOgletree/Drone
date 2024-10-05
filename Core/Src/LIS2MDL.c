@@ -42,7 +42,7 @@ static LIS2MDL_STATUS transmit_receive(uint8_t const * const TX,
     LIS2MDL_STATUS status = LIS2MDL_SUCCESS;
 
     taskENTER_CRITICAL();
-    HAL_GPIO_WritePin(GPIOx, GPIO_PINx, GPIO_PIN_RESET);
+    GPIOx->BSRR = (uint32_t)GPIO_PINx << 16U;
     if(HAL_SPI_Transmit(hspi,
                         (uint8_t *)TX,
                         NUM_TX,
@@ -58,7 +58,7 @@ static LIS2MDL_STATUS transmit_receive(uint8_t const * const TX,
             status = LIS2MDL_FAILURE;
         }
     }
-    HAL_GPIO_WritePin(GPIOx, GPIO_PINx, GPIO_PIN_SET);
+    GPIOx->BSRR = GPIO_PINx;
     taskEXIT_CRITICAL();
 
     return status;
@@ -71,7 +71,7 @@ static LIS2MDL_STATUS transmit(uint8_t const * const TX,
     LIS2MDL_STATUS status = LIS2MDL_SUCCESS;
 
     taskENTER_CRITICAL();
-    HAL_GPIO_WritePin(GPIOx, GPIO_PINx, GPIO_PIN_RESET);
+    GPIOx->BSRR = (uint32_t)GPIO_PINx << 16U;
     if(HAL_SPI_Transmit(hspi,
                         (uint8_t *)TX,
                         NUM_TX,
@@ -79,7 +79,7 @@ static LIS2MDL_STATUS transmit(uint8_t const * const TX,
                         != HAL_OK) {
         status = LIS2MDL_FAILURE;
     }
-    HAL_GPIO_WritePin(GPIOx, GPIO_PINx, GPIO_PIN_SET);
+    GPIOx->BSRR = GPIO_PINx;
     taskEXIT_CRITICAL();
 
     return status;
@@ -130,6 +130,8 @@ LIS2MDL_STATUS LIS2MDL_Read(LIS2MDL * const lis2mdl,
                         hspi) != LIS2MDL_SUCCESS) {
         return LIS2MDL_FAILURE;
     }
+
+    lis2mdl->timestamp = TIM5->CNT;
 
     lis2mdl->X = (int16_t)(((uint16_t)RX[1] << 8) | RX[0]);
     lis2mdl->Y = (int16_t)(((uint16_t)RX[3] << 8) | RX[2]);

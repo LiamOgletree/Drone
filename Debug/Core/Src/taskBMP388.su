@@ -1,5 +1,5 @@
-../Core/Src/taskBMP388.c:53:20:report_error	64	static
-../Core/Src/taskBMP388.c:62:20:send_update	64	static
-../Core/Src/taskBMP388.c:75:13:StartTaskTemperature	56	static
-../Core/Src/taskBMP388.c:105:13:StartTaskPressure	56	static
-../Core/Src/taskBMP388.c:130:6:StartTaskBMP388	48	static
+../Core/Src/taskBMP388.c:53:20:report_error	56	static
+../Core/Src/taskBMP388.c:70:20:send_update	56	static
+../Core/Src/taskBMP388.c:91:13:StartTemperature	80	static
+../Core/Src/taskBMP388.c:130:13:StartPressure	80	static
+../Core/Src/taskBMP388.c:164:6:StartBMP388	56	static

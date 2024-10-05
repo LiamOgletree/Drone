@@ -1,1 +1,4 @@
-../Core/Src/kalmanfilter.c:10:7:run_filter	32	static
+../Core/Src/kalmanfilter.c:10:6:filter_ctor	16	static
+../Core/Src/kalmanfilter.c:59:6:filter_set_timestep	24	static
+../Core/Src/kalmanfilter.c:78:6:filter_predict	48	static
+../Core/Src/kalmanfilter.c:100:6:filter_update	96	static

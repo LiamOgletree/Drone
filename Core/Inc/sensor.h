@@ -15,8 +15,9 @@
 typedef struct {
     SPI_HandleTypeDef  * const hspi;
     UART_HandleTypeDef * const huart;
-    RingBuffer         * const uart_rb;
+    RingBufferUART     * const uart_rb;
     osSemaphoreId_t    * const uartSemaphore;
+    osMutexId_t        * const uartMutex;
 } SENSOR_ARGS;
 
 #endif /* INC_SENSOR_H_ */

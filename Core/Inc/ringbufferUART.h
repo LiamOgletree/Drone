@@ -18,7 +18,7 @@ typedef enum {
     UPDATE_LIS2MDL,
     UPDATE_LSM6DSO32,
     UPDATE_ERROR
-} UPDATE_TYPE;
+} UART_UPDATE_TYPE;
 
 typedef struct {
     int type;
@@ -28,27 +28,27 @@ typedef struct {
         LSM6DSO32 lsm6dso32;
         char * error_buf;
     };
-} RingBuffer_t;
+} RingBufferUART_t;
 
-typedef struct RingBuffer {
+typedef struct {
     uint32_t capacity; // max size
     uint32_t size;     // current size ("occupancy")
     uint32_t head;
     uint32_t tail;
-    RingBuffer_t *buffer;
-} RingBuffer;
+    RingBufferUART_t *buffer;
+} RingBufferUART;
 
 typedef enum {
-    RB_SUCCESS,
-    RB_FAILURE
-} RB_STATUS;
+    RB_UART_SUCCESS,
+    RB_UART_FAILURE
+} RB_STATUS_UART;
 
-RB_STATUS RingBuffer_ctor(RingBuffer * const rb, 
-                          uint32_t const capacity,
-                          RingBuffer_t * const buffer);
-RB_STATUS RingBuffer_enqueue(RingBuffer * const rb,
-                             RingBuffer_t const item);
-RB_STATUS RingBuffer_dequeue(RingBuffer * const rb,
-                             RingBuffer_t * const item);
+RB_STATUS_UART RingBufferUART_ctor(RingBufferUART * const rb,
+                                   uint32_t const capacity,
+                                   RingBufferUART_t * const buffer);
+RB_STATUS_UART RingBufferUART_enqueue(RingBufferUART * const rb,
+                                      RingBufferUART_t const item);
+RB_STATUS_UART RingBufferUART_dequeue(RingBufferUART * const rb,
+                                      RingBufferUART_t * const item);
 
 #endif /* SRC_RINGBUFFER_H_ */

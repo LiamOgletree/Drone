@@ -51,7 +51,7 @@ static LSM6DSO32_STATUS transmit_receive(uint8_t const * const TX,
     LSM6DSO32_STATUS status = LSM6DSO32_SUCCESS;
 
     taskENTER_CRITICAL();
-    HAL_GPIO_WritePin(GPIOx, GPIO_PINx, GPIO_PIN_RESET);
+    GPIOx->BSRR = (uint32_t)GPIO_PINx << 16U;
     if(HAL_SPI_Transmit(hspi,
                         (uint8_t *)TX,
                         NUM_TX,
@@ -67,7 +67,7 @@ static LSM6DSO32_STATUS transmit_receive(uint8_t const * const TX,
             status = LSM6DSO32_FAILURE;
         }
     }
-    HAL_GPIO_WritePin(GPIOx, GPIO_PINx, GPIO_PIN_SET);
+    GPIOx->BSRR = GPIO_PINx;
     taskEXIT_CRITICAL();
 
     return status;
@@ -80,7 +80,7 @@ static LSM6DSO32_STATUS transmit(uint8_t const * const TX,
     LSM6DSO32_STATUS status = LSM6DSO32_SUCCESS;
 
     taskENTER_CRITICAL();
-    HAL_GPIO_WritePin(GPIOx, GPIO_PINx, GPIO_PIN_RESET);
+    GPIOx->BSRR = (uint32_t)GPIO_PINx << 16U;
     if(HAL_SPI_Transmit(hspi,
                         (uint8_t *)TX,
                         NUM_TX,
@@ -88,7 +88,7 @@ static LSM6DSO32_STATUS transmit(uint8_t const * const TX,
                         != HAL_OK) {
         status = LSM6DSO32_FAILURE;
     }
-    HAL_GPIO_WritePin(GPIOx, GPIO_PINx, GPIO_PIN_SET);
+    GPIOx->BSRR = GPIO_PINx;
     taskEXIT_CRITICAL();
 
     return status;
@@ -145,6 +145,8 @@ LSM6DSO32_STATUS LSM6DSO32_ReadGyro(LSM6DSO32 * const lsm6dso32_gyro,
         return LSM6DSO32_FAILURE;
     }
 
+    lsm6dso32_gyro->timestamp = TIM5->CNT;
+
     float sensitivity;
     switch(data_type) {
     case LSM6DSO32_RAW:
@@ -180,6 +182,8 @@ LSM6DSO32_STATUS LSM6DSO32_ReadAccel(LSM6DSO32 * const lsm6dso32_accel,
                         hspi) != LSM6DSO32_SUCCESS) {
         return LSM6DSO32_FAILURE;
     }
+
+    lsm6dso32_accel->timestamp = TIM5->CNT;
 
     float sensitivity;
     switch(data_type) {

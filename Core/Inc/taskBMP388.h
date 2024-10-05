@@ -8,6 +8,6 @@
 #ifndef INC_TASKBMP388_H_
 #define INC_TASKBMP388_H_
 
-void StartTaskBMP388(void *argument);
+void StartBMP388(void *argument);
 
 #endif /* INC_TASKBMP388_H_ */

@@ -8,6 +8,6 @@
 #ifndef INC_TASKLIS2MDL_H_
 #define INC_TASKLIS2MDL_H_
 
-void StartTaskLIS2MDL(void *argument);
+void StartLIS2MDL(void *argument);
 
 #endif /* INC_TASKLIS2MDL_H_ */
