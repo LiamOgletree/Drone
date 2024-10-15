@@ -13,8 +13,6 @@
 // TODO:
 //  1. Determine appropriate value for HAL_TIMEOUT instead of ~100 ms.
 //  2. Instead of suspending task, try to recover UART functionality.
-//  3. Try to find some way to make long sprintf statements with lots of
-//     /n and /r characters readable.
 
 /******************************/
 /*      HELPER FUNCTIONS      */
