@@ -1,0 +1,5 @@
+../Core/Src/sensorLSM6DSO32.c:42:18:LSM6DSO32_Setup	48	static
+../Core/Src/sensorLSM6DSO32.c:80:18:LSM6DSO32_ReadGyro	56	static
+../Core/Src/sensorLSM6DSO32.c:113:18:LSM6DSO32_ReadAccel	56	static
+../Core/Src/sensorLSM6DSO32.c:146:18:LSM6DSO32_CalibrateOffset	48	static
+../Core/Src/sensorLSM6DSO32.c:183:6:LSM6DSO32_UseOffset	16	static

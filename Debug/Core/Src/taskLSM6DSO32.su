@@ -1,5 +1,3 @@
-../Core/Src/taskLSM6DSO32.c:46:20:report_error	56	static
-../Core/Src/taskLSM6DSO32.c:63:20:send_update	56	static
-../Core/Src/taskLSM6DSO32.c:84:13:StartGyroscope	96	static
-../Core/Src/taskLSM6DSO32.c:113:13:StartAccelerometer	104	static
-../Core/Src/taskLSM6DSO32.c:154:6:StartLSM6DSO32	56	static
+../Core/Src/taskLSM6DSO32.c:46:13:StartGyroscope	176	static
+../Core/Src/taskLSM6DSO32.c:74:13:StartAccelerometer	192	static
+../Core/Src/taskLSM6DSO32.c:111:6:StartLSM6DSO32	80	static

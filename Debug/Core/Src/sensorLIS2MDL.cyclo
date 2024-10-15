@@ -1,0 +1,2 @@
+../Core/Src/sensorLIS2MDL.c:36:16:LIS2MDL_Setup	4
+../Core/Src/sensorLIS2MDL.c:73:16:LIS2MDL_Read	2

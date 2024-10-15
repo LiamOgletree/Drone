@@ -1,4 +1,0 @@
-../Core/Src/LIS2MDL.c:36:23:transmit_receive	32	static
-../Core/Src/LIS2MDL.c:67:23:transmit	32	static
-../Core/Src/LIS2MDL.c:92:16:LIS2MDL_Setup	40	static
-../Core/Src/LIS2MDL.c:122:16:LIS2MDL_Read	40	static

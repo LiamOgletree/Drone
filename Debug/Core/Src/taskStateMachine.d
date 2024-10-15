@@ -1,6 +1,5 @@
 Core/Src/taskStateMachine.o: ../Core/Src/taskStateMachine.c \
- ../Core/Inc/taskStateMachine.h ../Core/Inc/sensor.h \
- ../Core/Inc/ringbufferUART.h ../Core/Inc/main.h \
+ ../Core/Inc/StateMachine.h ../Core/Inc/main.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  ../Core/Inc/stm32f4xx_hal_conf.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \
@@ -30,19 +29,7 @@ Core/Src/taskStateMachine.o: ../Core/Src/taskStateMachine.c \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
- ../Core/Inc/BMP388.h ../Core/Inc/LIS2MDL.h ../Core/Inc/LSM6DSO32.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h \
- ../Core/Inc/FreeRTOSConfig.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h \
- ../Core/Inc/kalmanfilter.h ../Drivers/CMSIS/DSP/Include/arm_math.h \
+ ../Drivers/CMSIS/DSP/Include/arm_math.h \
  ../Drivers/CMSIS/DSP/Include/arm_math_types.h \
  ../Drivers/CMSIS/Include/cmsis_compiler.h \
  ../Drivers/CMSIS/DSP/Include/arm_math_memory.h \
@@ -71,10 +58,23 @@ Core/Src/taskStateMachine.o: ../Core/Src/taskStateMachine.c \
  ../Drivers/CMSIS/DSP/Include/dsp/complex_math_functions.h \
  ../Drivers/CMSIS/DSP/Include/dsp/filtering_functions.h \
  ../Drivers/CMSIS/DSP/Include/dsp/support_functions.h \
- ../Drivers/CMSIS/DSP/Include/dsp/quaternion_math_functions.h
-../Core/Inc/taskStateMachine.h:
-../Core/Inc/sensor.h:
-../Core/Inc/ringbufferUART.h:
+ ../Drivers/CMSIS/DSP/Include/dsp/quaternion_math_functions.h \
+ ../Core/Inc/taskShared.h ../Core/Inc/RingBuffer.h \
+ ../Core/Inc/sensorBMP388.h ../Core/Inc/sensorLIS2MDL.h \
+ ../Core/Inc/sensorLSM6DSO32.h \
+ ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h \
+ ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h \
+ ../Core/Inc/FreeRTOSConfig.h \
+ ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h \
+ ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h \
+ ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h \
+ ../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h \
+ ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h \
+ ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h \
+ ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h \
+ ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h \
+ ../Core/Inc/taskStateMachine.h
+../Core/Inc/StateMachine.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
@@ -105,21 +105,6 @@ Core/Src/taskStateMachine.o: ../Core/Src/taskStateMachine.c \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:
-../Core/Inc/BMP388.h:
-../Core/Inc/LIS2MDL.h:
-../Core/Inc/LSM6DSO32.h:
-../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h:
-../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
-../Core/Inc/FreeRTOSConfig.h:
-../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h:
-../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h:
-../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h:
-../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h:
-../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h:
-../Middlewares/Third_Party/FreeRTOS/Source/include/task.h:
-../Middlewares/Third_Party/FreeRTOS/Source/include/list.h:
-../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h:
-../Core/Inc/kalmanfilter.h:
 ../Drivers/CMSIS/DSP/Include/arm_math.h:
 ../Drivers/CMSIS/DSP/Include/arm_math_types.h:
 ../Drivers/CMSIS/Include/cmsis_compiler.h:
@@ -150,3 +135,20 @@ Core/Src/taskStateMachine.o: ../Core/Src/taskStateMachine.c \
 ../Drivers/CMSIS/DSP/Include/dsp/filtering_functions.h:
 ../Drivers/CMSIS/DSP/Include/dsp/support_functions.h:
 ../Drivers/CMSIS/DSP/Include/dsp/quaternion_math_functions.h:
+../Core/Inc/taskShared.h:
+../Core/Inc/RingBuffer.h:
+../Core/Inc/sensorBMP388.h:
+../Core/Inc/sensorLIS2MDL.h:
+../Core/Inc/sensorLSM6DSO32.h:
+../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h:
+../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
+../Core/Inc/FreeRTOSConfig.h:
+../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h:
+../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h:
+../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h:
+../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h:
+../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h:
+../Middlewares/Third_Party/FreeRTOS/Source/include/task.h:
+../Middlewares/Third_Party/FreeRTOS/Source/include/list.h:
+../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h:
+../Core/Inc/taskStateMachine.h:

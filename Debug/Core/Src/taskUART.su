@@ -1,2 +1,11 @@
-../Core/Src/taskUART.c:26:27:transmit	16	static
-../Core/Src/taskUART.c:44:6:StartUART	376	static
+../Core/Src/taskUART.c:25:27:transmit	24	static
+../Core/Src/taskUART.c:39:27:define_template	24	static
+../Core/Src/taskUART.c:78:20:set_pressure_reading	40	static
+../Core/Src/taskUART.c:89:20:set_temperature_reading	40	static
+../Core/Src/taskUART.c:100:20:set_magnetometer_reading	112	static
+../Core/Src/taskUART.c:120:20:set_gyroscope_reading	112	static
+../Core/Src/taskUART.c:138:20:set_accelerometer_reading	112	static
+../Core/Src/taskUART.c:156:20:set_sm_output	152	static
+../Core/Src/taskUART.c:182:20:set_rb_error_notification	16	static
+../Core/Src/taskUART.c:192:20:set_type_error_notification	16	static
+../Core/Src/taskUART.c:205:6:StartUART	464	static

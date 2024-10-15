@@ -1,0 +1,6 @@
+../Core/Src/sensorBMP388.c:44:13:compute_compensations	1
+../Core/Src/sensorBMP388.c:64:13:compensate_temperature	1
+../Core/Src/sensorBMP388.c:76:13:compensate_pressure	1
+../Core/Src/sensorBMP388.c:103:15:BMP388_Setup	4
+../Core/Src/sensorBMP388.c:146:15:BMP388_ReadTemp	3
+../Core/Src/sensorBMP388.c:182:15:BMP388_ReadPres	3

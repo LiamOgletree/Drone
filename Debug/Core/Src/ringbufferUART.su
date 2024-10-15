@@ -1,3 +1,0 @@
-../Core/Src/ringbufferUART.c:4:16:RingBufferUART_ctor	24	static
-../Core/Src/ringbufferUART.c:22:16:RingBufferUART_enqueue	24	static
-../Core/Src/ringbufferUART.c:44:16:RingBufferUART_dequeue	24	static

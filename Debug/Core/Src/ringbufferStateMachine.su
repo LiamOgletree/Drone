@@ -1,3 +1,0 @@
-../Core/Src/ringbufferStateMachine.c:10:14:RingBufferSM_ctor	24	static
-../Core/Src/ringbufferStateMachine.c:28:14:RingBufferSM_enqueue	24	static
-../Core/Src/ringbufferStateMachine.c:50:14:RingBufferSM_dequeue	16	static

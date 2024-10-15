@@ -1,0 +1,3 @@
+../Core/Src/taskShared.c:14:6:task_report_error	1
+../Core/Src/taskShared.c:31:6:task_send_update_all	1
+../Core/Src/taskShared.c:54:6:task_send_update_log	1

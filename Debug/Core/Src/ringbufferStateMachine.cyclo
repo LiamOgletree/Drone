@@ -1,3 +1,0 @@
-../Core/Src/ringbufferStateMachine.c:10:14:RingBufferSM_ctor	3
-../Core/Src/ringbufferStateMachine.c:28:14:RingBufferSM_enqueue	4
-../Core/Src/ringbufferStateMachine.c:50:14:RingBufferSM_dequeue	3

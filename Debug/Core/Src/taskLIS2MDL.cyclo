@@ -1,3 +1,1 @@
-../Core/Src/taskLIS2MDL.c:19:20:report_error	1
-../Core/Src/taskLIS2MDL.c:36:20:send_update	1
-../Core/Src/taskLIS2MDL.c:57:6:StartLIS2MDL	3
+../Core/Src/taskLIS2MDL.c:19:6:StartLIS2MDL	3

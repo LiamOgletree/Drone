@@ -22,12 +22,12 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "sensor.h"
 #include "taskUART.h"
 #include "taskBMP388.h"
 #include "taskLIS2MDL.h"
 #include "taskLSM6DSO32.h"
 #include "taskStateMachine.h"
+#include "taskShared.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,6 +49,7 @@
 SPI_HandleTypeDef hspi1;
 
 TIM_HandleTypeDef htim5;
+TIM_HandleTypeDef htim11;
 
 UART_HandleTypeDef huart2;
 
@@ -63,35 +64,35 @@ const osThreadAttr_t defaultTask_attributes = {
 osThreadId_t RunUARTHandle;
 const osThreadAttr_t RunUART_attributes = {
   .name = "RunUART",
-  .stack_size = 1024 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 384 * 4,
+  .priority = (osPriority_t) osPriorityBelowNormal7,
 };
 /* Definitions for RunBMP388 */
 osThreadId_t RunBMP388Handle;
 const osThreadAttr_t RunBMP388_attributes = {
   .name = "RunBMP388",
-  .stack_size = 512 * 4,
+  .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for RunLIS2MDL */
 osThreadId_t RunLIS2MDLHandle;
 const osThreadAttr_t RunLIS2MDL_attributes = {
   .name = "RunLIS2MDL",
-  .stack_size = 512 * 4,
+  .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for RunLSM6DSO32 */
 osThreadId_t RunLSM6DSO32Handle;
 const osThreadAttr_t RunLSM6DSO32_attributes = {
   .name = "RunLSM6DSO32",
-  .stack_size = 512 * 4,
+  .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for RunStateMachine */
 osThreadId_t RunStateMachineHandle;
 const osThreadAttr_t RunStateMachine_attributes = {
   .name = "RunStateMachine",
-  .stack_size = 16384 * 4,
+  .stack_size = 8192 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for uartMutex */
@@ -99,20 +100,34 @@ osMutexId_t uartMutexHandle;
 const osMutexAttr_t uartMutex_attributes = {
   .name = "uartMutex"
 };
+/* Definitions for smMutex */
+osMutexId_t smMutexHandle;
+const osMutexAttr_t smMutex_attributes = {
+  .name = "smMutex"
+};
 /* Definitions for uartSemaphore */
 osSemaphoreId_t uartSemaphoreHandle;
 const osSemaphoreAttr_t uartSemaphore_attributes = {
   .name = "uartSemaphore"
 };
+/* Definitions for smSemaphore */
+osSemaphoreId_t smSemaphoreHandle;
+const osSemaphoreAttr_t smSemaphore_attributes = {
+  .name = "smSemaphore"
+};
 /* USER CODE BEGIN PV */
-RingBufferUART uart_rb;
-RingBufferUART_t uart_rb_buf[64];
-SENSOR_ARGS _sensor_args = {.hspi = &hspi1,
-                            .huart = &huart2,
-                            .uart_rb = &uart_rb,
-                            .uartSemaphore = &uartSemaphoreHandle,
-                            .uartMutex = &uartMutexHandle};
-SENSOR_ARGS const * const sensor_args = &_sensor_args;
+RingBuffer uart_rb;
+RingBuffer sm_rb;
+RingBuffer_t uart_rb_buf[64];
+RingBuffer_t sm_rb_buf[64];
+TASK_ARGS task_args = {.hspi = &hspi1,
+                       .huart = &huart2,
+                       .uart_rb = &uart_rb,
+                       .sm_rb = &sm_rb,
+                       .uartSemaphore = &uartSemaphoreHandle,
+                       .smSemaphore = &smSemaphoreHandle,
+                       .uartMutex = &uartMutexHandle,
+                       .smMutex = &smMutexHandle};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -121,6 +136,7 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_TIM5_Init(void);
+static void MX_TIM11_Init(void);
 void StartDefaultTask(void *argument);
 extern void StartUART(void *argument);
 extern void StartBMP388(void *argument);
@@ -169,9 +185,11 @@ int main(void)
   MX_USART2_UART_Init();
   MX_SPI1_Init();
   MX_TIM5_Init();
+  MX_TIM11_Init();
   /* USER CODE BEGIN 2 */
 
-  RingBufferUART_ctor(&uart_rb, 64, uart_rb_buf);
+  RingBuffer_ctor(&uart_rb, 64, uart_rb_buf);
+  RingBuffer_ctor(&sm_rb, 64, sm_rb_buf);
   HAL_Delay(100);
 
   RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
@@ -185,6 +203,9 @@ int main(void)
   /* creation of uartMutex */
   uartMutexHandle = osMutexNew(&uartMutex_attributes);
 
+  /* creation of smMutex */
+  smMutexHandle = osMutexNew(&smMutex_attributes);
+
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
@@ -192,6 +213,9 @@ int main(void)
   /* Create the semaphores(s) */
   /* creation of uartSemaphore */
   uartSemaphoreHandle = osSemaphoreNew(64, 0, &uartSemaphore_attributes);
+
+  /* creation of smSemaphore */
+  smSemaphoreHandle = osSemaphoreNew(64, 0, &smSemaphore_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
@@ -210,19 +234,19 @@ int main(void)
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
   /* creation of RunUART */
-  RunUARTHandle = osThreadNew(StartUART, (void*) sensor_args, &RunUART_attributes);
+  RunUARTHandle = osThreadNew(StartUART, (void*) &task_args, &RunUART_attributes);
 
   /* creation of RunBMP388 */
-  RunBMP388Handle = osThreadNew(StartBMP388, (void*) sensor_args, &RunBMP388_attributes);
+  RunBMP388Handle = osThreadNew(StartBMP388, (void*) &task_args, &RunBMP388_attributes);
 
   /* creation of RunLIS2MDL */
-  RunLIS2MDLHandle = osThreadNew(StartLIS2MDL, (void*) sensor_args, &RunLIS2MDL_attributes);
+  RunLIS2MDLHandle = osThreadNew(StartLIS2MDL, (void*) &task_args, &RunLIS2MDL_attributes);
 
   /* creation of RunLSM6DSO32 */
-  RunLSM6DSO32Handle = osThreadNew(StartLSM6DSO32, (void*) sensor_args, &RunLSM6DSO32_attributes);
+  RunLSM6DSO32Handle = osThreadNew(StartLSM6DSO32, (void*) &task_args, &RunLSM6DSO32_attributes);
 
   /* creation of RunStateMachine */
-  RunStateMachineHandle = osThreadNew(StartStateMachine, (void*) sensor_args, &RunStateMachine_attributes);
+  RunStateMachineHandle = osThreadNew(StartStateMachine, (void*) &task_args, &RunStateMachine_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -380,6 +404,37 @@ static void MX_TIM5_Init(void)
 }
 
 /**
+  * @brief TIM11 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM11_Init(void)
+{
+
+  /* USER CODE BEGIN TIM11_Init 0 */
+
+  /* USER CODE END TIM11_Init 0 */
+
+  /* USER CODE BEGIN TIM11_Init 1 */
+
+  /* USER CODE END TIM11_Init 1 */
+  htim11.Instance = TIM11;
+  htim11.Init.Prescaler = 0;
+  htim11.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim11.Init.Period = 4199;
+  htim11.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim11.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim11) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM11_Init 2 */
+
+  /* USER CODE END TIM11_Init 2 */
+
+}
+
+/**
   * @brief USART2 Initialization Function
   * @param None
   * @retval None
@@ -395,11 +450,11 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
+  huart2.Init.BaudRate = 2097152;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;
-  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.Mode = UART_MODE_TX;
   huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
   huart2.Init.OverSampling = UART_OVERSAMPLING_16;
   if (HAL_UART_Init(&huart2) != HAL_OK)

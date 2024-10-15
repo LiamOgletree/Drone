@@ -1,0 +1,2 @@
+../Core/Src/sensorShared.c:23:15:sensor_tx_rx	3
+../Core/Src/sensorShared.c:68:15:sensor_tx	1
