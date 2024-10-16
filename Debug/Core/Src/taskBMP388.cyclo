@@ -1,3 +1,0 @@
-../Core/Src/taskBMP388.c:52:13:StartTemperature	3
-../Core/Src/taskBMP388.c:92:13:StartPressure	2
-../Core/Src/taskBMP388.c:124:6:StartBMP388	2

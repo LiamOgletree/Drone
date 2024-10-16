@@ -1,3 +1,0 @@
-../Core/Src/taskLSM6DSO32.c:46:13:StartGyroscope	176	static
-../Core/Src/taskLSM6DSO32.c:74:13:StartAccelerometer	192	static
-../Core/Src/taskLSM6DSO32.c:111:6:StartLSM6DSO32	80	static
