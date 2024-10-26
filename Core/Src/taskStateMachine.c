@@ -8,10 +8,10 @@
 #include "StateMachine.h"
 #include "taskShared.h"
 #include "taskStateMachine.h"
+#include <stdbool.h>
 
 // TODO:
-//  1. Implement pressure, magnetometer, and gyroscope updates.
-//  2. Implement dynamic dt computation, not fixed time step.
+//  1. Implement pressure, magnetometer, gyroscope, and GPS updates.
 
 /******************************/
 /*       CORE FUNCTIONS       */
@@ -30,12 +30,13 @@ void StartStateMachine(void *argument)
     RingBuffer_t update;
     RingBuffer_t sm_update;
     RB_STATUS status;
-    uint32_t timestamp;
+    uint32_t last_update;
+    uint32_t dt;
     StateMachine_t state;
     arm_matrix_instance_f32 z_instance;
     SM_UPDATE_TYPE update_type;
     float z[3][1];
-    float dt;
+    bool first_iteration = true;
 
     // Update the state machine indefinitely.
     for(;;) {
@@ -73,8 +74,9 @@ void StartStateMachine(void *argument)
             z[2][0] = update.lsm6dso32.Z;
             arm_mat_init_f32(&z_instance, 3, 1, &z[0][0]);
             // Compute time step.
-            timestamp = TIM5->CNT;
-            dt = 0.025;
+            dt = update.lsm6dso32.timestamp > last_update
+               ? update.lsm6dso32.timestamp - last_update
+               : 0xFFFFFFFF - last_update + update.lsm6dso32.timestamp + 1;
             // Set update flag.
             update_type = SM_ACCELEROMETER;
             break;
@@ -84,13 +86,31 @@ void StartStateMachine(void *argument)
             vTaskSuspend(NULL);
         }
 
+        /******** TEMPORARY ********/
+        if(update.type != RB_ACCELEROMETER) continue;
+        /******** TEMPORARY ********/
+
+        // On the first iteration, we do not have a meaningful last update
+        //  time. We set dt=0 to initialize the state to the first reading,
+        //  and we set the last update time to the first reading time.
+        //  NOTE: Unsigned integer overflow is well-defined.
+        if(first_iteration) {
+            last_update += dt;
+            dt = 0;
+            first_iteration = false;
+        }
+
         // Update state machine.
-        SM_set_timestep(&stateMachine, dt);
+        SM_set_timestep(&stateMachine, dt / (float)TIM5_CLK_SPEED);
         SM_predict(&stateMachine);
         if(SM_update(&stateMachine, z_instance, update_type) != SM_SUCCESS) {
-            task_report_error(args, "STATE MACHINE FILTER TYPE ERROR");
+            task_report_error(args, "STATE MACHINE UPDATE ERROR");
             vTaskSuspend(NULL);
         }
+
+        // Store the newest update time, only if we successfully update the
+        //  state machine. NOTE: Unsigned integer overflow is well-defined.
+        last_update += dt;
 
         // Update state machine object to pass to UART ring buffer.
         state = (StateMachine_t){

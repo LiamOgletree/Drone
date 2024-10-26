@@ -120,6 +120,7 @@ RingBuffer uart_rb;
 RingBuffer sm_rb;
 RingBuffer_t uart_rb_buf[64];
 RingBuffer_t sm_rb_buf[64];
+
 TASK_ARGS task_args = {.hspi = &hspi1,
                        .huart = &huart2,
                        .uart_rb = &uart_rb,

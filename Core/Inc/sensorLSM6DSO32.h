@@ -42,11 +42,5 @@ LSM6DSO32_STATUS LSM6DSO32_ReadGyro(LSM6DSO32 * const lsm6dso32_gyro,
 LSM6DSO32_STATUS LSM6DSO32_ReadAccel(LSM6DSO32 * const lsm6dso32_accel,
                                      SPI_HandleTypeDef * const hspi,
                                      LSM6DSO32_DATA_TYPE const data_type);
-LSM6DSO32_STATUS LSM6DSO32_CalibrateOffset(LSM6DSO32 * const lsm6dso32,
-                                           LSM6DSO32_OFFSET * const offset,
-                                           SPI_HandleTypeDef * const hspi,
-                                           LSM6DSO32_DATA_TYPE const data_type);
-void LSM6DSO32_UseOffset(LSM6DSO32 * const lsm6dso32,
-                         LSM6DSO32_OFFSET * const offset);
 
 #endif /* INC_SENSORLSM6DSO32_H_ */
