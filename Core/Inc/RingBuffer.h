@@ -11,6 +11,7 @@
 #include <sensorBMP388.h>
 #include <sensorLIS2MDL.h>
 #include <sensorLSM6DSO32.h>
+#include <sensorPA1616S.h>
 #include <StateMachine.h>
 #include "main.h"
 
@@ -20,6 +21,8 @@ typedef enum {
     RB_MAGNETOMETER,
     RB_GYROSCOPE,
     RB_ACCELEROMETER,
+    RB_GPS,
+    RB_GPS_IDLE,
     RB_STATEMACHINE,
     RB_ERROR
 } RB_TYPE;
@@ -31,6 +34,8 @@ typedef struct {
         LIS2MDL lis2mdl;
         LSM6DSO32 lsm6dso32;
         StateMachine_t state;
+        PA1616S pa1616s;
+        PA1616S_IDLE pa1616s_idle;
         char * error_buf;
     };
 } RingBuffer_t;

@@ -42,12 +42,12 @@ void StartStateMachine(void *argument)
     for(;;) {
         // Wait for a producer task to read from a sensor, place the data
         //  in the State Machine ring buffer, and post a semaphore.
-        osSemaphoreAcquire(*args.smSemaphore, osWaitForever);
+        osSemaphoreAcquire(*args.sm_semaphore, osWaitForever);
 
         // Retrieve an update from the State Machine ring buffer.
-        osMutexAcquire(*args.smMutex, osWaitForever);
-        status = RingBuffer_dequeue(args.sm_rb, &update);
-        osMutexRelease(*args.smMutex);
+        osMutexAcquire(*args.sm_mutex, osWaitForever);
+        status = RingBuffer_dequeue(args.sm_ringbuffer, &update);
+        osMutexRelease(*args.sm_mutex);
 
         // If ring buffer dequeue returns a failure, report the error
         //  via the UART ring buffer and then suspend the State Machine task.

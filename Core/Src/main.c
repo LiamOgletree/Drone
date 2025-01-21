@@ -22,10 +22,10 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "taskUART.h"
 #include "taskBMP388.h"
 #include "taskLIS2MDL.h"
 #include "taskLSM6DSO32.h"
+#include "taskPA1616S.h"
 #include "taskStateMachine.h"
 #include "taskShared.h"
 /* USER CODE END Includes */
@@ -51,7 +51,9 @@ SPI_HandleTypeDef hspi1;
 TIM_HandleTypeDef htim5;
 TIM_HandleTypeDef htim11;
 
+UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
+DMA_HandleTypeDef hdma_usart1_rx;
 
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
@@ -60,11 +62,11 @@ const osThreadAttr_t defaultTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
-/* Definitions for RunUART */
-osThreadId_t RunUARTHandle;
-const osThreadAttr_t RunUART_attributes = {
-  .name = "RunUART",
-  .stack_size = 384 * 4,
+/* Definitions for RunLogger */
+osThreadId_t RunLoggerHandle;
+const osThreadAttr_t RunLogger_attributes = {
+  .name = "RunLogger",
+  .stack_size = 1000 * 4,
   .priority = (osPriority_t) osPriorityBelowNormal7,
 };
 /* Definitions for RunBMP388 */
@@ -95,55 +97,80 @@ const osThreadAttr_t RunStateMachine_attributes = {
   .stack_size = 8192 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
-/* Definitions for uartMutex */
-osMutexId_t uartMutexHandle;
-const osMutexAttr_t uartMutex_attributes = {
-  .name = "uartMutex"
+/* Definitions for runPA1616S */
+osThreadId_t runPA1616SHandle;
+const osThreadAttr_t runPA1616S_attributes = {
+  .name = "runPA1616S",
+  .stack_size = 6000 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for loggerMutex */
+osMutexId_t loggerMutexHandle;
+const osMutexAttr_t loggerMutex_attributes = {
+  .name = "loggerMutex"
 };
 /* Definitions for smMutex */
 osMutexId_t smMutexHandle;
 const osMutexAttr_t smMutex_attributes = {
   .name = "smMutex"
 };
-/* Definitions for uartSemaphore */
-osSemaphoreId_t uartSemaphoreHandle;
-const osSemaphoreAttr_t uartSemaphore_attributes = {
-  .name = "uartSemaphore"
+/* Definitions for pa1616sMutex */
+osMutexId_t pa1616sMutexHandle;
+const osMutexAttr_t pa1616sMutex_attributes = {
+  .name = "pa1616sMutex"
+};
+/* Definitions for loggerSemaphore */
+osSemaphoreId_t loggerSemaphoreHandle;
+const osSemaphoreAttr_t loggerSemaphore_attributes = {
+  .name = "loggerSemaphore"
 };
 /* Definitions for smSemaphore */
 osSemaphoreId_t smSemaphoreHandle;
 const osSemaphoreAttr_t smSemaphore_attributes = {
   .name = "smSemaphore"
 };
+/* Definitions for pa1616sSemaphore */
+osSemaphoreId_t pa1616sSemaphoreHandle;
+const osSemaphoreAttr_t pa1616sSemaphore_attributes = {
+  .name = "pa1616sSemaphore"
+};
 /* USER CODE BEGIN PV */
-RingBuffer uart_rb;
-RingBuffer sm_rb;
-RingBuffer_t uart_rb_buf[64];
-RingBuffer_t sm_rb_buf[64];
+RingBuffer logger_ringbuffer;
+RingBuffer sm_ringbuffer;
+RingBuffer pa1616s_ringbuffer;
+RingBuffer_t logger_ringbuffer_buf[64];
+RingBuffer_t sm_ringbuffer_buf[64];
+RingBuffer_t pa1616s_ringbuffer_buf[64];
 
 TASK_ARGS task_args = {.hspi = &hspi1,
-                       .huart = &huart2,
-                       .uart_rb = &uart_rb,
-                       .sm_rb = &sm_rb,
-                       .uartSemaphore = &uartSemaphoreHandle,
-                       .smSemaphore = &smSemaphoreHandle,
-                       .uartMutex = &uartMutexHandle,
-                       .smMutex = &smMutexHandle};
+                       .huart_logger = &huart2,
+                       .huart_pa1616s = &huart1,
+                       .logger_ringbuffer = &logger_ringbuffer,
+                       .sm_ringbuffer = &sm_ringbuffer,
+                       .pa1616s_ringbuffer = &pa1616s_ringbuffer,
+                       .logger_semaphore = &loggerSemaphoreHandle,
+                       .sm_semaphore = &smSemaphoreHandle,
+                       .pa1616s_semaphore = &pa1616sSemaphoreHandle,
+                       .logger_mutex = &loggerMutexHandle,
+                       .sm_mutex = &smMutexHandle};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_TIM5_Init(void);
 static void MX_TIM11_Init(void);
+static void MX_USART1_UART_Init(void);
 void StartDefaultTask(void *argument);
-extern void StartUART(void *argument);
+extern void StartLogger(void *argument);
 extern void StartBMP388(void *argument);
 extern void StartLIS2MDL(void *argument);
 extern void StartLSM6DSO32(void *argument);
 extern void StartStateMachine(void *argument);
+extern void StartPA1616S(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -183,14 +210,17 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_USART2_UART_Init();
   MX_SPI1_Init();
   MX_TIM5_Init();
   MX_TIM11_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  RingBuffer_ctor(&uart_rb, 64, uart_rb_buf);
-  RingBuffer_ctor(&sm_rb, 64, sm_rb_buf);
+  RingBuffer_ctor(&logger_ringbuffer, 64, logger_ringbuffer_buf);
+  RingBuffer_ctor(&sm_ringbuffer, 64, sm_ringbuffer_buf);
+  RingBuffer_ctor(&pa1616s_ringbuffer, 64, pa1616s_ringbuffer_buf);
   HAL_Delay(100);
 
   RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
@@ -201,22 +231,28 @@ int main(void)
   /* Init scheduler */
   osKernelInitialize();
   /* Create the mutex(es) */
-  /* creation of uartMutex */
-  uartMutexHandle = osMutexNew(&uartMutex_attributes);
+  /* creation of loggerMutex */
+  loggerMutexHandle = osMutexNew(&loggerMutex_attributes);
 
   /* creation of smMutex */
   smMutexHandle = osMutexNew(&smMutex_attributes);
+
+  /* creation of pa1616sMutex */
+  pa1616sMutexHandle = osMutexNew(&pa1616sMutex_attributes);
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
 
   /* Create the semaphores(s) */
-  /* creation of uartSemaphore */
-  uartSemaphoreHandle = osSemaphoreNew(64, 0, &uartSemaphore_attributes);
+  /* creation of loggerSemaphore */
+  loggerSemaphoreHandle = osSemaphoreNew(64, 0, &loggerSemaphore_attributes);
 
   /* creation of smSemaphore */
   smSemaphoreHandle = osSemaphoreNew(64, 0, &smSemaphore_attributes);
+
+  /* creation of pa1616sSemaphore */
+  pa1616sSemaphoreHandle = osSemaphoreNew(64, 0, &pa1616sSemaphore_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
@@ -234,8 +270,8 @@ int main(void)
   /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
-  /* creation of RunUART */
-  RunUARTHandle = osThreadNew(StartUART, (void*) &task_args, &RunUART_attributes);
+  /* creation of RunLogger */
+  RunLoggerHandle = osThreadNew(StartLogger, (void*) &task_args, &RunLogger_attributes);
 
   /* creation of RunBMP388 */
   RunBMP388Handle = osThreadNew(StartBMP388, (void*) &task_args, &RunBMP388_attributes);
@@ -248,6 +284,9 @@ int main(void)
 
   /* creation of RunStateMachine */
   RunStateMachineHandle = osThreadNew(StartStateMachine, (void*) &task_args, &RunStateMachine_attributes);
+
+  /* creation of runPA1616S */
+  runPA1616SHandle = osThreadNew(StartPA1616S, (void*) &task_args, &runPA1616S_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -436,6 +475,39 @@ static void MX_TIM11_Init(void)
 }
 
 /**
+  * @brief USART1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART1_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART1_Init 0 */
+
+  /* USER CODE END USART1_Init 0 */
+
+  /* USER CODE BEGIN USART1_Init 1 */
+
+  /* USER CODE END USART1_Init 1 */
+  huart1.Instance = USART1;
+  huart1.Init.BaudRate = 9600;
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.StopBits = UART_STOPBITS_1;
+  huart1.Init.Parity = UART_PARITY_NONE;
+  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART1_Init 2 */
+
+  /* USER CODE END USART1_Init 2 */
+
+}
+
+/**
   * @brief USART2 Initialization Function
   * @param None
   * @retval None
@@ -465,6 +537,22 @@ static void MX_USART2_UART_Init(void)
   /* USER CODE BEGIN USART2_Init 2 */
 
   /* USER CODE END USART2_Init 2 */
+
+}
+
+/**
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA2_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA2_Stream2_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream2_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
 
 }
 

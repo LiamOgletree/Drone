@@ -16,13 +16,16 @@
 
 typedef struct {
     SPI_HandleTypeDef  * const hspi;
-    UART_HandleTypeDef * const huart;
-    RingBuffer         * const uart_rb;
-    RingBuffer         * const sm_rb;
-    osSemaphoreId_t    * const uartSemaphore;
-    osSemaphoreId_t    * const smSemaphore;
-    osMutexId_t        * const uartMutex;
-    osMutexId_t        * const smMutex;
+    UART_HandleTypeDef * const huart_logger;
+    UART_HandleTypeDef * const huart_pa1616s;
+    RingBuffer         * const logger_ringbuffer;
+    RingBuffer         * const sm_ringbuffer;
+    RingBuffer         * const pa1616s_ringbuffer;
+    osSemaphoreId_t    * const logger_semaphore;
+    osSemaphoreId_t    * const sm_semaphore;
+    osSemaphoreId_t    * const pa1616s_semaphore;
+    osMutexId_t        * const logger_mutex;
+    osMutexId_t        * const sm_mutex;
 } TASK_ARGS;
 
 void task_report_error(TASK_ARGS const args,

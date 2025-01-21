@@ -5,10 +5,10 @@
  *      Author: liamt
  */
 
-#include "taskUART.h"
 #include "taskShared.h"
 #include <stdio.h>
 #include <string.h>
+#include <taskLogger.h>
 
 // TODO:
 //  1. Determine appropriate value for HAL_TIMEOUT instead of ~100 ms.
@@ -18,23 +18,23 @@
 /*      HELPER FUNCTIONS      */
 /******************************/
 
-static inline UART_STATUS transmit(UART_HandleTypeDef * const huart,
-                                   char * const buf)
+static inline LOGGER_STATUS transmit(UART_HandleTypeDef * const huart,
+                                     char * const buf)
 {
-    UART_STATUS status = UART_SUCCESS;
+    LOGGER_STATUS status = LOGGER_SUCCESS;
 
     // Conduct UART transaction to send message.
     if(HAL_UART_Transmit(huart, (uint8_t*)buf, strlen(buf), HAL_TIMEOUT)
             != HAL_OK) {
-        status = UART_FAILURE;
+        status = LOGGER_FAILURE;
     }
 
     return status;
 }
 
-static inline UART_STATUS define_template(char * const buf)
+static inline LOGGER_STATUS define_template(char * const buf)
 {
-    HAL_StatusTypeDef status = UART_SUCCESS;
+    HAL_StatusTypeDef status = LOGGER_SUCCESS;
 
     // Place UART terminal template in buffer.
     if(sprintf(buf, "%c[0;0H\n"
@@ -62,10 +62,16 @@ static inline UART_STATUS define_template(char * const buf)
                  "\tacc_y:\t\t\tm/s^2\r\n"
                  "\tpos_z:\t\t\tm\r\n"
                  "\tvel_z:\t\t\tm/s\r\n"
-                 "\tacc_z:\t\t\tm/s^2\r\n",
+                 "\tacc_z:\t\t\tm/s^2\r\n"
+                 "GPS Reading:\r\n"
+                 "\tLon:\r\n"
+                 "\tLat:\r\n"
+                 "\tAlt:\t\t\tm\r\n"
+                 "\tSpeed:\t\t\tknots\r\n"
+                 "\tHeading:\t\tdeg",
                  0x1b)
             < 0) {
-        status = UART_FAILURE;
+        status = LOGGER_FAILURE;
     }
 
     return status;
@@ -149,6 +155,25 @@ static inline void set_accelerometer_reading(char * const buf,
                  timestamp);
 }
 
+static inline void set_gps_reading(char * const buf,
+                                   PA1616S const * const pa1616s)
+{
+    //float const timestamp = lsm6dso32->timestamp / TIM5_CLK_SPEED;
+    sprintf(buf, "%c[0;0H"
+                 "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+                 "\t\t%5.4f\r\n"
+                 "\t\t%5.4f\r\n"
+                 "\t\t%5.2f\r\n"
+                 "\t\t%5.2f\r\n"
+                 "\t\t%5.2f\r\n",
+                 0x1b,
+                 pa1616s->longitude,
+                 pa1616s->latitude,
+                 pa1616s->altitude,
+                 pa1616s->speed,
+                 pa1616s->heading);
+}
+
 static inline void set_sm_output(char * const buf,
                                  StateMachine_t const * const state)
 {
@@ -198,19 +223,19 @@ static inline void set_type_error_notification(char * const buf,
 /*       CORE FUNCTIONS       */
 /******************************/
 
-void StartUART(void *argument)
+void StartLogger(void *argument)
 {
     TASK_ARGS const args = *(TASK_ARGS*)argument;
 
-    char buf[360];
+    char buf[500];
 
     // Set character buffer to hold UART template.
-    if(define_template(buf) != UART_SUCCESS) {
+    if(define_template(buf) != LOGGER_SUCCESS) {
         vTaskSuspend(NULL);
     }
 
     // Transmit template to terminal using UART.
-    if(transmit(args.huart, buf) != UART_SUCCESS) {
+    if(transmit(args.huart_logger, buf) != LOGGER_SUCCESS) {
         vTaskSuspend(NULL);
     }
 
@@ -220,19 +245,19 @@ void StartUART(void *argument)
     for(;;) {
         // Wait for producer or state machine task to send an update
         //  to the UART ring buffer and post a semaphore.
-        osSemaphoreAcquire(*args.uartSemaphore, osWaitForever);
+        osSemaphoreAcquire(*args.logger_semaphore, osWaitForever);
 
         // Retrieve latest update from UART ring buffer with mutex
         //  to prevent race conditions possibly corrupting data.
-        osMutexAcquire(*args.uartMutex, osWaitForever);
-        status = RingBuffer_dequeue(args.uart_rb, &update);
-        osMutexRelease(*args.uartMutex);
+        osMutexAcquire(*args.logger_mutex, osWaitForever);
+        status = RingBuffer_dequeue(args.logger_ringbuffer, &update);
+        osMutexRelease(*args.logger_mutex);
 
         // If unsuccessful retrieving an update, print error to the
         //  terminal and suspend UART task.
         if(status != RB_SUCCESS) {
             sprintf(buf, "%c[0;0H RINGBUFFER DEQUEUE ERROR", 0x1b);
-            transmit(args.huart, buf);
+            transmit(args.huart_logger, buf);
             vTaskSuspend(NULL);
         }
 
@@ -257,6 +282,10 @@ void StartUART(void *argument)
         case RB_ACCELEROMETER:
             set_accelerometer_reading(buf, &update.lsm6dso32);
             break;
+        // If updating GPS reading on the terminal:
+        case RB_GPS:
+            set_gps_reading(buf, &update.pa1616s);
+            break;
         // If updating the state machine output on the terminal:
         case RB_STATEMACHINE:
             set_sm_output(buf, &update.state);
@@ -272,7 +301,7 @@ void StartUART(void *argument)
         }
 
         // Display the contents of buf on the terminal screen.
-        if(transmit(args.huart, buf) != UART_SUCCESS) {
+        if(transmit(args.huart_logger, buf) != LOGGER_SUCCESS) {
             vTaskSuspend(NULL);
         }
     }

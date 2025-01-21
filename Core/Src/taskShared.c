@@ -20,12 +20,12 @@ void task_report_error(TASK_ARGS const args,
 
     // Enqueue the RingBuffer_t object without creating race conditions
     //  with other tasks either enqueueing or dequeueing from the RingBuffer.
-    osMutexAcquire(*args.uartMutex, osWaitForever);
-    RingBuffer_enqueue(args.uart_rb, tmp);
-    osMutexRelease(*args.uartMutex);
+    osMutexAcquire(*args.logger_mutex, osWaitForever);
+    RingBuffer_enqueue(args.logger_ringbuffer, tmp);
+    osMutexRelease(*args.logger_mutex);
 
     // Notify the UART task that a RingBuffer_t object has been enqueued.
-    osSemaphoreRelease(*args.uartSemaphore);
+    osSemaphoreRelease(*args.logger_semaphore);
 }
 
 void task_send_update_all(TASK_ARGS const args,
@@ -33,22 +33,22 @@ void task_send_update_all(TASK_ARGS const args,
 {
     // Enqueue the RingBuffer_t object without creating race conditions
     //  with other tasks either enqueueing or dequeueing from the RingBuffer.
-    osMutexAcquire(*args.smMutex, osWaitForever);
-    RingBuffer_enqueue(args.sm_rb, update);
-    osMutexRelease(*args.smMutex);
+    osMutexAcquire(*args.sm_mutex, osWaitForever);
+    RingBuffer_enqueue(args.sm_ringbuffer, update);
+    osMutexRelease(*args.sm_mutex);
 
     // Notify the State Machine task that a RingBuffer_t object
     //  has been enqueued.
-    osSemaphoreRelease(*args.smSemaphore);
+    osSemaphoreRelease(*args.sm_semaphore);
 
     // Enqueue the RingBuffer_t object without creating race conditions
     //  with other tasks either enqueueing or dequeueing from the RingBuffer.
-    osMutexAcquire(*args.uartMutex, osWaitForever);
-    RingBuffer_enqueue(args.uart_rb, update);
-    osMutexRelease(*args.uartMutex);
+    osMutexAcquire(*args.logger_mutex, osWaitForever);
+    RingBuffer_enqueue(args.logger_ringbuffer, update);
+    osMutexRelease(*args.logger_mutex);
 
     // Notify the UART task that a RingBuffer_t object has been enqueued.
-    osSemaphoreRelease(*args.uartSemaphore);
+    osSemaphoreRelease(*args.logger_semaphore);
 }
 
 void task_send_update_log(TASK_ARGS const args,
@@ -56,10 +56,10 @@ void task_send_update_log(TASK_ARGS const args,
 {
     // Enqueue the RingBuffer_t object without creating race conditions
     //  with other tasks either enqueueing or dequeueing from the RingBuffer.
-    osMutexAcquire(*args.uartMutex, osWaitForever);
-    RingBuffer_enqueue(args.uart_rb, update);
-    osMutexRelease(*args.uartMutex);
+    osMutexAcquire(*args.logger_mutex, osWaitForever);
+    RingBuffer_enqueue(args.logger_ringbuffer, update);
+    osMutexRelease(*args.logger_mutex);
 
     // Notify the UART task that a RingBuffer_t object has been enqueued.
-    osSemaphoreRelease(*args.uartSemaphore);
+    osSemaphoreRelease(*args.logger_semaphore);
 }
